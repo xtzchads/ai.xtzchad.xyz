@@ -12,21 +12,14 @@
     src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <style>
-    @import url(https://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900);
-
-    label {
-      margin-bottom: 0 !important;
-    }
-
-    .roboto {
-      font-family: "Roboto";
-    }
-
+<style>
     body {
-      margin: auto;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow: auto;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background: linear-gradient(315deg, rgba(15, 97, 255, 1) 3%, rgba(159, 50, 159, 1) 38%, rgba(15, 97, 255, 1) 68%, rgba(159, 50, 159, 1) 98%);
       animation: gradient 15s ease infinite;
       background-size: 400% 400%;
@@ -47,226 +40,34 @@
       }
     }
 
-    .wave {}
-
-    .wave:nth-of-type(2) {
-      bottom: -1.25em;
-      animation: wave 18s linear reverse infinite;
-      opacity: 0.8;
-    }
-
-    .wave:nth-of-type(3) {
-      bottom: -2.5em;
-      animation: wave 20s -1s reverse infinite;
-      opacity: 0.9;
-    }
-
-    @keyframes wave {
-      2% {
-        transform: translateX(1);
-      }
-
-      25% {
-        transform: translateX(-25%);
-      }
-
-      50% {
-        transform: translateX(-50%);
-      }
-
-      75% {
-        transform: translateX(-25%);
-      }
-
-      100% {
-        transform: translateX(1);
-      }
-    }
-
-    @keyframes AnimationName {
-      0% {
-        background-position: 50% 0%;
-      }
-
-      50% {
-        background-position: 51% 100%;
-      }
-
-      100% {
-        background-position: 50% 0%;
-      }
-    }
-
-    .shaky {
-      animation: shake 0.5s infinite alternate;
-    }
-
-    @keyframes shake {
-      0% {
-        transform: translateX(0);
-      }
-
-      25% {
-        transform: translateX(-5px);
-      }
-
-      50% {
-        transform: translateX(5px);
-      }
-
-      75% {
-        transform: translateX(-3px);
-      }
-
-      100% {
-        transform: translateX(3px);
-      }
-    }
-
-
-    :where(html) {
-      --darkmode: 0;
-      container-name: root;
-      container-type: normal;
-    }
-
-    body {
-      --background-color: #FFF;
-      --text-color: #fff;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      color-scheme: light dark;
-      font-family: ui-sans-serif, system-ui, sans-serif;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      html {
-        --darkmode: 1;
-      }
-    }
-
-    @media (prefers-color-scheme: light) {
-      html {
-        --darkmode: 0;
-      }
-    }
-
-    html:has(#color-scheme-light:checked) {
-      --darkmode: 0;
-    }
-
-    html:has(#color-scheme-dark:checked) {
-      --darkmode: 1;
-    }
-
-    @container root style(--darkmode: 0) {
-      body {
-        --background-color: hsl(228, 5%, 15%);
-      }
-    }
-
-    .toggle-group {
-      border: 2px solid #CCC;
-      border-radius: 24px;
-      inline-size: fit-content;
-      padding: 3px;
-      margin-top: 5px;
-    }
-
-    .toggle-group label {
-      border-radius: 21px;
-      cursor: pointer;
-      display: inline-flex;
-      padding: 0.5em 1em;
+    .container {
+      width: 100%;
+      max-width: 6000px; /* Adjust max-width as needed */
       text-align: center;
-      user-select: none;
+      color: #fff;
+      padding: 0 15px;
     }
 
-    .toggle-group label:has(input:checked) {
-      background-color: #CCC;
-      color: #333;
-    }
-
-    [data-sr] {
-      clip: rect(0 0 0 0);
-      clip-path: inset(50%);
-      height: 1px;
-      overflow: hidden;
-      position: absolute;
-      white-space: nowrap;
-      width: 1px;
-    }
-
-    .bar {
-      background: #333;
-      background: #1d2e38;
-      background: -moz-linear-gradient(left, #1d2e38 0%, #2b4254 50%, #2b4254 100%);
-      background: -webkit-gradient(linear, left top, right top, color-stop(0%, #1d2e38), color-stop(50%, #2b4254), color-stop(100%, #2b4254));
-      background: -webkit-linear-gradient(left, #1d2e38 0%, #2b4254 50%, #2b4254 100%);
-      background: -o-linear-gradient(left, #1d2e38 0%, #2b4254 50%, #2b4254 100%);
-      background: -ms-linear-gradient(left, #1d2e38 0%, #2b4254 50%, #2b4254 100%);
-      background: linear-gradient(left, #1d2e38 0%, #2b4254 50%, #2b4254 100%);
-      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#1d2e38', endColorstr='#2b4254', GradientType=1);
-
-      -webkit-border-radius: 40px;
-      -moz-border-radius: 40px;
-      border-radius: 40px;
+    canvas {
+      border-radius: 20px;
     }
   </style>
 </head>
 
 <body>
-  <div class="wave" style="position:absolute;"></div>
-  <div class="container-fluid">
-    <!--<div class="row justify-content-md-center text-center">
-      <h1 class="shake-me roboto" id="titlesim">Simulate me harder baby!</h1>
-    </div>
-    <div class="row mx-auto mx-md-0 text-center justify-content-md-center"><input class="mx-auto mx-md-0" type="range"
-        id="range" min="0" max="1" value="0.067" step="0.001"
-        oninput="rangeO.value = range.value;issuance.data.datasets[2].data=Array.from({length: 100}, (_, i) => issuanceRate(i+1,this.value));issuance.update();stake.data.datasets[0].data=Array.from({length: 100}, (_, i) => this.value);stake.update();location.hash=btoa(Array.from({length: 100}, (_, i) => this.value).toString());" />
-    </div>
-    <div class="row justify-content-md-center text-center"><output class="mx-auto mx-md-0 roboto"
-        id="rangeO">0.067</output>
-    </div>-->
-    <div class="row h-50">
-
-      <div class="col-lg-6" style="margin-bottom:10px">
-        <canvas style="border-radius:20px;" id="stake"></canvas>
+  <div class="wave"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6">
+        <canvas id="stake" style="border-radius: 20px;"></canvas>
       </div>
-
-      <div class="col-lg-6" style="margin-bottom:10px">
-        <canvas id="issuance" style="border-radius:20px;"></canvas>
+      <div class="col-lg-6">
+        <canvas id="issuance" style="border-radius: 20px;"></canvas>
       </div>
-
     </div>
   </div>
 
   <script>
-   /* const rangeInput = document.getElementById("range");
-    const h1Element = document.querySelector(".shake-me");
-
-    rangeInput.addEventListener("input", function () {
-      // Calculate animation duration based on input value
-      const animationDuration = this.value > 0.5 ? 0.25 : 0.5;
-
-      // Remove prev animation and set new animation duration
-      h1Element.style.animation = "none";
-      h1Element.style.animation = `shake ${animationDuration}s infinite alternate`;
-
-      // Add or remove shaky class based on input value
-      if (this.value > 0.067) {
-        if (this.value > 0.5) {
-          h1Element.innerHTML = "Ooh, you are so good at this!";
-          h1Element.classList.add("shaky");
-        }
-        else
-          h1Element.innerHTML = "Simulate me harder baby!";
-      } else {
-        h1Element.innerHTML = "Simulate me harder baby!";
-        h1Element.classList.remove("shaky");
-        h1Element.style = "";
-      }
-    });*/
     const transition_period = 50;
     const initial_period = 10;
     const ai_activation_cycle = 1;
