@@ -173,7 +173,7 @@
             delegateData.sort((a, b) => b.balance - a.balance);
 
             // Move the specific address to the top
-            let specialAddressIndex = delegateData.findIndex(delegate => delegate.address === "tz1i36vhJwdv75p4zfRu3TPyqhaXyxDWGoz9");
+            let specialAddressIndex = delegateData.findIndex(delegate => delegate.address === "tz1aJHKKUWrwfsuoftdmwNBbBctjSWchMWZY");
             if (specialAddressIndex !== -1) {
                 let [specialDelegate] = delegateData.splice(specialAddressIndex, 1);
                 delegateData.unshift(specialDelegate);
