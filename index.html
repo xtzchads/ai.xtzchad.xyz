@@ -162,12 +162,71 @@ var gradientStroke = stx.createLinearGradient(500, 0, 100, 0);
 gradientStroke.addColorStop(0, '#80b6f4');
 gradientStroke.addColorStop(1, '#f49080');
     // Setup charts
-    if (location.hash != "") {
-      ratio = atob(location.hash.substring(1)).split(",");
-    }
-    else
-      ratio = Array.from({length: 100}, (_, i) => 0.067);
-    //ratio = 0.067;
+	
+	
+function fetchCycleCount() {
+  return fetch('https://api.tzkt.io/v1/cycles/count')
+    .then(response => response.json());
+}
+
+function fetchCycleData(cycle) {
+  return fetch(`https://api.tzkt.io/v1/statistics/cyclic?cycle=${cycle}`)
+    .then(response => response.json());
+}
+
+function initializeRatios() {
+  let cycleCount;
+  return fetchCycleCount()
+    .then(count => {
+      cycleCount = count;
+      const currentCycle = cycleCount - 4;
+      const startCycle = 748;
+      let ratios = [];
+      let last = 0;
+
+      const fetchPromises = [];
+
+      for (let i = startCycle; i <= currentCycle; i++) {
+        fetchPromises.push(fetchCycleData(i));
+      }
+
+      return Promise.all(fetchPromises);
+    })
+    .then(data => {
+      let ratios = [];
+      let last = 0;
+      data.forEach(cycleData => {
+        const ratio = cycleData[0].totalFrozen / cycleData[0].totalSupply;
+        ratios.push(ratio);
+        last = ratio;
+      });
+
+      // Fill the remaining array with the last value
+      while (ratios.length < 100) {
+        ratios.push(last);
+      }
+      return ratios;
+    });
+}
+
+let ratio;
+
+if (location.hash != "") {
+  ratio = atob(location.hash.substring(1)).split(",");
+  main(ratio);
+} else {
+  initializeRatios()
+    .then(ratios => {
+      ratio = ratios;
+      main(ratio); // Assuming main function setup is here
+    })
+    .catch(error => {
+      console.error('Error initializing ratios:', error);
+    });
+}
+
+   function main()
+   {
     dataIssuance = {
       labels: Array.from({length: 100}, (_, i) => i + 1),
       datasets: [{
@@ -315,17 +374,18 @@ borderColor: gradientStroke,
       }
     };
     // Create the chart
-    var issuance = new Chart(
+    window.issuance = new Chart(
       itx,
       configIssuance
     );
 
-    var stake = new Chart(
+    window.stake = new Chart(
       stx,
       configStake
     );
     document.getElementById('issuance').style['background-color'] = '#fff';
     document.getElementById('stake').style['background-color'] = '#fff';
+	}
   </script>
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
     integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
