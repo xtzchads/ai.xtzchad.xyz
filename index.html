@@ -69,199 +69,263 @@
   </div>
 
   <script>
-const transitionPeriod = 50;
-const initialPeriod = 10;
-const aiActivationCycle = 1;
-let tmp = 0;
+    const transition_period = 50;
+    const initial_period = 10;
+    const ai_activation_cycle = 1;
 
-function computeExtremum(cycle, initialValue, finalValue) {
-    const transition = transitionPeriod + 1;
-    const initialLimit = aiActivationCycle + initialPeriod;
-    const transitionLimit = initialLimit + transition;
+    //This calculates min and max issuance values depending on cycle and upper/lower limits
+    function computeExtremum(cycle, initial_value, final_value) {
 
-    if (cycle <= initialLimit) {
-        return initialValue;
-    } else if (cycle >= transitionLimit) {
-        return finalValue;
-    } else {
-        const t = cycle - initialLimit;
-        return (t * (finalValue - initialValue) / transition) + initialValue;
+      const trans = transition_period + 1;
+      const initial_limit = ai_activation_cycle + initial_period;
+      const trans_limit = initial_limit + trans;
+
+      if (cycle <= initial_limit) {
+        return initial_value;
+      } else if (cycle >= trans_limit) {
+        return final_value;
+      } else {
+        const t = cycle - initial_limit;
+        const res = (t * (final_value - initial_value) / trans) + initial_value;
+        return res;
+      }
     }
-}
 
-const minimumRatio = cycle => computeExtremum(cycle, 0.045, 0.0025);
-const maximumRatio = cycle => computeExtremum(cycle, 0.055, 0.1);
-const stakedRatio = (cycle, value) => value;
+    function minimumRatio(cycle) {
+      return computeExtremum(cycle, 0.045, 0.0025);
+    }
 
-function clip(value, minValue, maxValue) {
-    return Math.max(minValue, Math.min(value, maxValue));
-}
+    function maximumRatio(cycle) {
+      return computeExtremum(cycle, 0.055, 0.1);
+    }
 
-function staticRate(cycle, value) {
-    const stakedRatioValue = value;
-    const staticRateValue = 1 / 1600 * (1 / (stakedRatioValue ** 2));
-    return clip(staticRateValue, minimumRatio(cycle + 1), maximumRatio(cycle + 1));
-}
+    function stakedRatio(cycle, value) {
+      return value;
+    }
 
-function dyn(cycle, value, stakedRatioValue) {
-    if (cycle <= aiActivationCycle) {
+    function staticRate(cycle, value) {
+      const stakedRatioValue = value;
+      const staticRateValue = 1 / 1600 * (1 / (stakedRatioValue ** 2));
+      return clip(staticRateValue, minimumRatio(cycle + 1), maximumRatio(cycle + 1));
+    }
+
+    function clip(value, min_value, max_value) {
+      return Math.max(min_value, Math.min(value, max_value));
+    }
+
+    var tmp = 0;
+    //calculate bonus reward
+    function dyn(cycle, value, tmp1) {
+      if (cycle <= ai_activation_cycle) {
         tmp = 0;
         return 0;
+      }
+      const previousBonus = tmp;
+      const stakedRatioValue = tmp1;
+      const secondsPerCycle = 245760;
+      const ratioMax = maximumRatio(cycle + 1);
+      const staticRateValue = staticRate(cycle, value);
+      const staticRateDistToMax = ratioMax - staticRateValue;
+      const udist = Math.max(0, Math.abs(stakedRatioValue - 0.5) - 0.02);
+      const dist = stakedRatioValue >= 0.5 ? -udist : udist;
+      const daysPerCycle = secondsPerCycle / 86400;
+      const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
+      newBonus = previousBonus + dist * 0.01 * daysPerCycle;
+      const res = clip(newBonus, 0, maxNewBonus);
+      console.assert(res >= 0 && res <= 5);
+      tmp = res;
+      return res;
     }
-    const previousBonus = tmp;
-    const secondsPerCycle = 245760;
-    const ratioMax = maximumRatio(cycle + 1);
-    const staticRateValue = staticRate(cycle, value);
-    const staticRateDistToMax = ratioMax - staticRateValue;
-    const udist = Math.max(0, Math.abs(stakedRatioValue - 0.5) - 0.02);
-    const dist = stakedRatioValue >= 0.5 ? -udist : udist;
-    const daysPerCycle = secondsPerCycle / 86400;
-    const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
-    const newBonus = previousBonus + dist * 0.01 * daysPerCycle;
-    const res = clip(newBonus, 0, maxNewBonus);
+    var tmp1;
+    //calculate total reward - static + bonus, make sure it's in [min,max] ratiorange
+    function issuanceRate(cycle, value) {
+      const adjustedCycle = cycle;
+      tmp1 = value;
+      const staticRateRatio = staticRate(cycle, value);
+      const bonus = dyn(cycle, value, tmp1);
+      const ratioMin = minimumRatio(adjustedCycle);
+      const ratioMax = maximumRatio(adjustedCycle);
+      const totalRate = staticRateRatio + bonus;
+      return clip(totalRate, ratioMin, ratioMax) * 100;
+    }
 
-    tmp = res;
-    return res;
-}
 
-function issuanceRate(cycle, value) {
-    const staticRateRatio = staticRate(cycle, value);
-    const bonus = dyn(cycle, value, value);
-    const totalRate = staticRateRatio + bonus;
-    return clip(totalRate, minimumRatio(cycle), maximumRatio(cycle)) * 100;
-}
-
-const ctxStake = document.getElementById('stake').getContext("2d");
-const gradientStroke = ctxStake.createLinearGradient(500, 0, 100, 0);
+  </script>
+  <script>
+var stx = document.getElementById('stake').getContext("2d");
+var gradientStroke = stx.createLinearGradient(500, 0, 100, 0);
 gradientStroke.addColorStop(0, '#80b6f4');
 gradientStroke.addColorStop(1, '#f49080');
 
-const ctxIssuance = document.getElementById('issuance').getContext("2d");
-
-let ratio = location.hash ? atob(location.hash.substring(1)).split(",").map(Number) : Array(100).fill(0.067);
-
-const dataIssuance = {
-    labels: Array.from({ length: 100 }, (_, i) => i + 1),
-    datasets: [
-        {
-            label: 'MaxRatio',
-            data: Array.from({ length: 100 }, (_, i) => maximumRatio(i + 1) * 100),
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 3,
-            pointRadius: 1,
-        },
-        {
-            label: 'MinRatio',
-            data: Array.from({ length: 100 }, (_, i) => minimumRatio(i + 1) * 100),
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 3,
-            pointRadius: 1,
-        },
-        {
-            label: 'Issuance',
-            data: Array.from({ length: 100 }, (_, i) => issuanceRate(i + 1, ratio[i])),
-            borderColor: gradientStroke,
+var itx = document.getElementById('issuance').getContext("2d");
+var gradientStroke = stx.createLinearGradient(500, 0, 100, 0);
+gradientStroke.addColorStop(0, '#80b6f4');
+gradientStroke.addColorStop(1, '#f49080');
+    // Setup charts
+    if (location.hash != "") {
+      ratio = atob(location.hash.substring(1)).split(",");
+    }
+    else
+      ratio = Array.from({length: 100}, (_, i) => 0.067);
+    //ratio = 0.067;
+    dataIssuance = {
+      labels: Array.from({length: 100}, (_, i) => i + 1),
+      datasets: [{
+        label: 'MaxRatio',
+        data: Array.from({length: 100}, (_, i) => maximumRatio(i + 1) * 100),
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 3,
+        pointRadius: 1,
+      }, {
+        label: 'MinRatio',
+        data: Array.from({length: 100}, (_, i) => minimumRatio(i + 1) * 100),
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 3,
+        pointRadius: 1,
+      },
+      {
+        label: 'Issuance',
+        data: Array.from({length: 100}, (_, i) => issuanceRate(i + 1, ratio[i])),
+borderColor: gradientStroke,
             pointBorderColor: gradientStroke,
             pointBackgroundColor: gradientStroke,
-            pointHoverBackgroundColor: gradientStroke,
+           pointHoverBackgroundColor: gradientStroke,
             pointHoverBorderColor: gradientStroke,
-            backgroundColor: 'rgba(1, 255, 132, 0.2)',
-            borderWidth: 3,
-            pointRadius: 1,
-        }
-    ]
-};
+backgroundColor: 'rgba(1, 255, 132, 0.2)',
 
-const dataStake = {
-    labels: Array.from({ length: 100 }, (_, i) => i + 1),
-    datasets: [{
-        borderColor: gradientStroke,
-        pointBorderColor: gradientStroke,
-        pointBackgroundColor: gradientStroke,
-        pointHoverBackgroundColor: gradientStroke,
-        pointHoverBorderColor: gradientStroke,
+        borderWidth: 3,
+        pointRadius: 1,
+      }]
+    };
+    dataStake = {
+      labels: Array.from({length: 100}, (_, i) => i + 1),
+      datasets: [{
+borderColor: gradientStroke,
+            pointBorderColor: gradientStroke,
+            pointBackgroundColor: gradientStroke,
+           pointHoverBackgroundColor: gradientStroke,
+            pointHoverBorderColor: gradientStroke,
         label: 'Stake (Drag points to customize)',
-        data: Array.from({ length: 100 }, (_, i) => stakedRatio(i + 1, ratio[i])),
+        data: Array.from({length: 100}, (_, i) => stakedRatio(i + 1, ratio[i])),
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         borderWidth: 3,
         pointRadius: 1,
-    }]
-};
+      }]
+    };
 
-const configIssuance = {
-    type: 'line',
-    data: dataIssuance,
-    options: {
+    // Configuration
+    configIssuance = {
+      type: 'line',
+      data: dataIssuance,
+      options: {
         plugins: {
-            tooltip: { enabled: true }
+          tooltip: {
+            enabled: true,
+          }
         },
         scales: {
-            x: {
-                title: { display: true, text: 'Cycles' },
-                ticks: { stepSize: 1 }
+          x: {
+            title: {
+              display: true,
+              text: 'Cycles'
             },
-            y: {
-                title: { display: true, text: 'Issuance' },
-                min: 0,
-                max: 11,
-                ticks: { stepSize: 1 }
+            ticks: {
+              stepSize: 1
             }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Issuance'
+            },
+            min: 0,
+            max: 11,
+            ticks: {
+              stepSize: 1
+            }
+          }
         }
-    }
-};
-
-const configStake = {
-    type: 'line',
-    data: dataStake,
-    options: {
-        elements: { line: { tension: 0.4 } },
+      }
+    };
+    configStake = {
+      type: 'line',
+      data: dataStake,
+      options: {
+        elements: {
+          line: {
+            tension: 0.4
+          }
+        },
+        //parsing: false,
         plugins: {
-            tooltip: { enabled: true },
-            annotation: {
-                annotations: [{
-                    type: 'box',
-                    drawTime: 'beforeDatasetsDraw',
-                    yMin: 0.48,
-                    yMax: 0.52,
-                    backgroundColor: 'rgba(255, 255, 0, 0.1)'
-                }]
+          tooltip: {
+            enabled: true
+          },
+          annotation: {
+            annotations: [{
+              type: 'box',
+              drawTime: 'beforeDatasetsDraw',
+              yMin: 0.48,
+              yMax: 0.52,
+              backgroundColor: 'rgba(255, 255, 0, 0.1)'
+            }]
+          },
+          dragData: {
+            round: 3, // rounds the values to n decimal places
+            showTooltip: true, // show the tooltip while dragging [default = true]
+            onDragStart: function (e, element) {
             },
-            dragData: {
-                round: 3,
-                showTooltip: true,
-                onDrag(e, datasetIndex, index, value) {
-                    tmp = value;
-                    const data = window.ctxStake.data.datasets[datasetIndex].data;
-                    data.fill(value, index);
-                    window.ctxStake.update();
-                    issuance.data.datasets[2].data = data.map((val, i) => issuanceRate(i + 1, val));
-                    location.hash = btoa(data.toString());
-                    issuance.update();
-                }
-            }
+            onDrag: function (e, datasetIndex, index, value) {
+              tmp = value;
+              for (i = index; i < window.stake.data.datasets[datasetIndex].data.length; i++) {window.stake.data.datasets[datasetIndex].data[i] = value}
+              window.stake.update();
+              issuance.data.datasets[2].data = Array.from({length: 100}, (_, i) => issuanceRate(i + 1, window.stake.data.datasets[0].data[i]));
+              location.hash = btoa(window.stake.data.datasets[datasetIndex].data.toString());
+              issuance.update();
+            },
+            onDragEnd: function (e, datasetIndex, index, value) {
+
+            },
+          },
         },
         scales: {
-            x: {
-                title: { display: true, text: 'Cycles' },
-                ticks: { stepSize: 1 }
+          x: {
+            title: {
+              display: true,
+              text: 'Cycles'
             },
-            y: {
-                title: { display: true, text: 'Staking Ratio' },
-                min: 0,
-                max: 1,
-                ticks: { stepSize: 0.2 }
+            ticks: {
+              stepSize: 1
             }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Staking Ratio'
+            },
+            min: 0,
+            max: 1,
+            ticks: {
+              stepSize: 0.2
+            }
+          }
         }
-    }
-};
+      }
+    };
+    // Create the chart
+    var issuance = new Chart(
+      itx,
+      configIssuance
+    );
 
-const issuance = new Chart(ctxIssuance, configIssuance);
-const stake = new Chart(ctxStake, configStake);
-
-document.getElementById('issuance').style.backgroundColor = '#fff';
-document.getElementById('stake').style.backgroundColor = '#fff';
+    var stake = new Chart(
+      stx,
+      configStake
+    );
+    document.getElementById('issuance').style['background-color'] = '#fff';
+    document.getElementById('stake').style['background-color'] = '#fff';
   </script>
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
     integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
