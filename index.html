@@ -233,9 +233,9 @@ const configStake = {
                 showTooltip: true,
                 onDrag(e, datasetIndex, index, value) {
                     tmp = value;
-                    const data = window.stake.data.datasets[datasetIndex].data;
+                    const data = window.ctxStake.data.datasets[datasetIndex].data;
                     data.fill(value, index);
-                    window.stake.update();
+                    window.ctxStake.update();
                     issuance.data.datasets[2].data = data.map((val, i) => issuanceRate(i + 1, val));
                     location.hash = btoa(data.toString());
                     issuance.update();
