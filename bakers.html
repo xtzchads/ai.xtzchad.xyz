@@ -118,6 +118,12 @@
     margin: 1em 0;
 }
 
+.toggle-group {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -170,10 +176,11 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
-#toggleLabel {
+#toggleLabel1, #toggleLabel2 {
     font-weight: bold;
     color: #333;
 }
+
 
     </style>
 </head>
@@ -189,13 +196,24 @@ input:checked + .slider:before {
 </div>
 
 <div id="totalStakedBalance" class="center"></div>
+
 <div class="center toggle-container">
-    <label class="toggle-switch">
-        <input type="checkbox" id="toggleAllBakers">
-        <span class="slider round"></span>
-    </label>
-    <span id="toggleLabel">Fees <= 40%</span>
+    <div class="toggle-group">
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggleAllBakers">
+            <span class="slider round"></span>
+        </label>
+        <span id="toggleLabel1">Fees <= 40%</span>
+    </div>
+    <div class="toggle-group">
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggleAliasBakers">
+            <span class="slider round"></span>
+        </label>
+        <span id="toggleLabel2">Public</span>
+    </div>
 </div>
+
 
 <div id="spinner" class="spinner"></div>
 
@@ -212,74 +230,86 @@ input:checked + .slider:before {
 </table>
 
 <script>
-    let allBakers = [];
-    let filteredBakers = [];
+let allBakers = [];
+let filteredBakers = [];
 
-    async function fetchDelegateData() {
-        const spinner = document.getElementById('spinner');
-        const table = document.getElementById('delegateTable');
-        const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
+async function fetchDelegateData() {
+    const spinner = document.getElementById('spinner');
+    const table = document.getElementById('delegateTable');
+    const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
 
-        spinner.style.display = 'block';
-        table.style.display = 'none';
+    spinner.style.display = 'block';
+    table.style.display = 'none';
 
-        try {
-            let bakers = await fetch('https://api.tzkt.io/v1/delegates?limit=10000&active=true');
-            let data = await bakers.json();
-            let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
-            let staked = await stats.json();
+    try {
+        let bakers = await fetch('https://api.tzkt.io/v1/delegates?limit=10000&active=true');
+        let data = await bakers.json();
+        let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
+        let staked = await stats.json();
 
-            allBakers = [];
-            data.forEach(delegate => {
-                if (delegate.limitOfStakingOverBaking && delegate.limitOfStakingOverBaking > 0) {
-                    let address = delegate.address;
-                    let alias = delegate.alias || 'No alias';
-                    let balance = ((delegate.stakedBalance * delegate.limitOfStakingOverBaking / 1000000 - delegate.externalStakedBalance) / 1000000).toFixed(6);
-                    let edgeOfBakingOverStaking = (delegate.edgeOfBakingOverStaking / 10000000).toFixed(2);
+        allBakers = [];
+        data.forEach(delegate => {
+            if (delegate.limitOfStakingOverBaking && delegate.limitOfStakingOverBaking > 0) {
+                let address = delegate.address;
+                let alias = delegate.alias || 'No alias';
+                let balance = ((delegate.stakedBalance * delegate.limitOfStakingOverBaking / 1000000 - delegate.externalStakedBalance) / 1000000).toFixed(6);
+                let edgeOfBakingOverStaking = (delegate.edgeOfBakingOverStaking / 10000000).toFixed(2);
 
-                    allBakers.push({
-                        address: address,
-                        alias: alias,
-                        balance: parseInt(balance),
-                        edgeOfBakingOverStaking: edgeOfBakingOverStaking + "%"
-                    });
-                }
-            });
-
-            // Display total staked balance
-            totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
-
-            // Sort the data by balance in descending order
-            allBakers.sort((a, b) => b.balance - a.balance);
-
-            // Move the specific address to the top
-            let specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1cXUERthGxHcDVAdKsFiFa4sSWbuGorghY");
-            if (specialAddressIndex !== -1) {
-                let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
-                allBakers.unshift(specialDelegate);
+                allBakers.push({
+                    address: address,
+                    alias: alias,
+                    balance: parseInt(balance),
+                    edgeOfBakingOverStaking: edgeOfBakingOverStaking + "%"
+                });
             }
+        });
 
-            applyFilter();
+        // Display total staked balance
+        totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
 
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            spinner.style.display = 'none';
-            table.style.display = 'table';
+        // Sort the data by balance in descending order
+        allBakers.sort((a, b) => b.balance - a.balance);
+
+        // Move the specific address to the top
+        let specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1aJHKKUWrwfsuoftdmwNBbBctjSWchMWZY");
+        if (specialAddressIndex !== -1) {
+            let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
+            allBakers.unshift(specialDelegate);
         }
-    }
 
-    function applyFilter() {
+        applyFilter();
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    } finally {
+        spinner.style.display = 'none';
+        table.style.display = 'table';
+    }
+}
+
+function applyFilter() {
     const table = document.getElementById('delegateTable');
     const showAllBakers = document.getElementById('toggleAllBakers').checked;
-    const toggleLabel = document.getElementById('toggleLabel');
+    const showAliasBakers = document.getElementById('toggleAliasBakers').checked;
+    const toggleLabel1 = document.getElementById('toggleLabel1');
+    const toggleLabel2 = document.getElementById('toggleLabel2');
     
-    if (showAllBakers) {
-        filteredBakers = allBakers;
-        toggleLabel.textContent = "All bakers";
+    filteredBakers = allBakers;
+
+    if (!showAllBakers) {
+        filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) <= 40);
+        toggleLabel1.textContent = "Fees <= 40%";
     } else {
-        filteredBakers = allBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) <= 40);
-        toggleLabel.textContent = "Fees <= 40%";
+		filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) > 40);
+        toggleLabel1.textContent = "Fees > 40%";
+    }
+
+    if (!showAliasBakers) {
+        toggleLabel2.textContent = "Public";
+		filteredBakers = filteredBakers.filter(delegate => delegate.alias !== 'No alias');
+    } else {
+		filteredBakers = filteredBakers.filter(delegate => delegate.alias === 'No alias');
+        toggleLabel2.textContent = "Private";
     }
 
     // Clear the table body
@@ -301,34 +331,35 @@ input:checked + .slider:before {
     });
 }
 
+// Sort table by column index
+function sortTable(columnIndex, isNumeric) {
+    const table = document.getElementById('delegateTable');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.rows);
 
-    // Sort table by column index
-    function sortTable(columnIndex, isNumeric) {
-        const table = document.getElementById('delegateTable');
-        const tbody = table.querySelector('tbody');
-        const rows = Array.from(tbody.rows);
+    const compare = (a, b) => {
+        const cellA = a.cells[columnIndex].textContent;
+        const cellB = b.cells[columnIndex].textContent;
+        return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
+    };
 
-        const compare = (a, b) => {
-            const cellA = a.cells[columnIndex].textContent;
-            const cellB = b.cells[columnIndex].textContent;
-            return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
-        };
+    const currentOrder = table.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+    table.setAttribute('data-sort-order', currentOrder);
 
-        const currentOrder = table.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
-        table.setAttribute('data-sort-order', currentOrder);
+    rows.sort((a, b) => currentOrder === 'asc' ? compare(a, b) : compare(b, a));
 
-        rows.sort((a, b) => currentOrder === 'asc' ? compare(a, b) : compare(b, a));
+    rows.forEach(row => tbody.appendChild(row));
+}
 
-        rows.forEach(row => tbody.appendChild(row));
-    }
+document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
+document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
+document.getElementById('toggleAllBakers').addEventListener('change', applyFilter);
+document.getElementById('toggleAliasBakers').addEventListener('change', applyFilter);
 
-    document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
-    document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
-    document.getElementById('toggleAllBakers').addEventListener('change', applyFilter);
+// Fetch data initially and then every 60 seconds
+fetchDelegateData();
+setInterval(fetchDelegateData, 60000);
 
-    // Fetch data initially and then every 60 seconds
-    fetchDelegateData();
-    setInterval(fetchDelegateData, 60000);
 </script>
 
 </body>
