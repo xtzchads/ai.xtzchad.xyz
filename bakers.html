@@ -172,7 +172,7 @@
             });
 
             // Display total staked balance
-            totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%).'+'Track it on <a href="https://up.xtzchad.xyz" target="_blank">up.xtzchad.xyz</a>';
+            totalStakedBalanceDiv.innerHTML = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%).'+'Track it on <a href="https://up.xtzchad.xyz" target="_blank">up.xtzchad.xyz</a>';
 
             // Sort the data by balance in descending order
             delegateData.sort((a, b) => b.balance - a.balance);
