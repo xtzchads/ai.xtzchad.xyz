@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staking Data</title>
+    <title>Delegate Data</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,6 +21,7 @@
             color: #fff;
             width: 100%;
             text-align: center;
+            padding: 1em 0;
         }
 
         table {
@@ -109,6 +110,71 @@
                 font-weight: bold;
             }
         }
+
+        .toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1em 0;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin-right: 10px;
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+#toggleLabel {
+    font-weight: bold;
+    color: #333;
+}
+
     </style>
 </head>
 <body>
@@ -123,6 +189,13 @@
 </div>
 
 <div id="totalStakedBalance" class="center"></div>
+<div class="center toggle-container">
+    <label class="toggle-switch">
+        <input type="checkbox" id="toggleAllBakers">
+        <span class="slider round"></span>
+    </label>
+    <span id="toggleLabel">Fees <= 40%</span>
+</div>
 
 <div id="spinner" class="spinner"></div>
 
@@ -139,6 +212,9 @@
 </table>
 
 <script>
+    let allBakers = [];
+    let filteredBakers = [];
+
     async function fetchDelegateData() {
         const spinner = document.getElementById('spinner');
         const table = document.getElementById('delegateTable');
@@ -153,8 +229,7 @@
             let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
             let staked = await stats.json();
 
-            let delegateData = [];
-
+            allBakers = [];
             data.forEach(delegate => {
                 if (delegate.limitOfStakingOverBaking && delegate.limitOfStakingOverBaking > 0) {
                     let address = delegate.address;
@@ -162,7 +237,7 @@
                     let balance = ((delegate.stakedBalance * delegate.limitOfStakingOverBaking / 1000000 - delegate.externalStakedBalance) / 1000000).toFixed(6);
                     let edgeOfBakingOverStaking = (delegate.edgeOfBakingOverStaking / 10000000).toFixed(2);
 
-                    delegateData.push({
+                    allBakers.push({
                         address: address,
                         alias: alias,
                         balance: parseInt(balance),
@@ -172,36 +247,19 @@
             });
 
             // Display total staked balance
-            totalStakedBalanceDiv.innerHTML = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%).'+'Track it on <a href="https://up.xtzchad.xyz" target="_blank">up.xtzchad.xyz</a>';
+            totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
 
             // Sort the data by balance in descending order
-            delegateData.sort((a, b) => b.balance - a.balance);
+            allBakers.sort((a, b) => b.balance - a.balance);
 
             // Move the specific address to the top
-            
-            let specialAddressIndex = delegateData.findIndex(delegate => delegate.address === "tz1cXUERthGxHcDVAdKsFiFa4sSWbuGorghY");
+            let specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1aJHKKUWrwfsuoftdmwNBbBctjSWchMWZY");
             if (specialAddressIndex !== -1) {
-                let [specialDelegate] = delegateData.splice(specialAddressIndex, 1);
-                delegateData.unshift(specialDelegate);
+                let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
+                allBakers.unshift(specialDelegate);
             }
 
-            // Clear the table body
-            const tableBody = table.querySelector('tbody');
-            tableBody.innerHTML = '';
-
-            // Populate the table with sorted data
-            delegateData.forEach(delegate => {
-                let row = tableBody.insertRow();
-                let cell1 = row.insertCell(0);
-                let cell2 = row.insertCell(1);
-                let cell3 = row.insertCell(2);
-                let cell4 = row.insertCell(3);
-
-                cell1.textContent = delegate.address;
-                cell2.textContent = delegate.alias;
-                cell3.textContent = delegate.balance;
-                cell4.textContent = delegate.edgeOfBakingOverStaking;
-            });
+            applyFilter();
 
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -210,6 +268,39 @@
             table.style.display = 'table';
         }
     }
+
+    function applyFilter() {
+    const table = document.getElementById('delegateTable');
+    const showAllBakers = document.getElementById('toggleAllBakers').checked;
+    const toggleLabel = document.getElementById('toggleLabel');
+    
+    if (showAllBakers) {
+        filteredBakers = allBakers;
+        toggleLabel.textContent = "All bakers";
+    } else {
+        filteredBakers = allBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) <= 40);
+        toggleLabel.textContent = "Fees <= 40%";
+    }
+
+    // Clear the table body
+    const tableBody = table.querySelector('tbody');
+    tableBody.innerHTML = '';
+
+    // Populate the table with filtered data
+    filteredBakers.forEach(delegate => {
+        let row = tableBody.insertRow();
+        let cell1 = row.insertCell(0);
+        let cell2 = row.insertCell(1);
+        let cell3 = row.insertCell(2);
+        let cell4 = row.insertCell(3);
+
+        cell1.textContent = delegate.address;
+        cell2.textContent = delegate.alias;
+        cell3.textContent = delegate.balance;
+        cell4.textContent = delegate.edgeOfBakingOverStaking;
+    });
+}
+
 
     // Sort table by column index
     function sortTable(columnIndex, isNumeric) {
@@ -223,18 +314,17 @@
             return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
         };
 
-        const currentOrder = table.getAttribute('data-sort-order') || 'asc';
-        const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+        const currentOrder = table.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+        table.setAttribute('data-sort-order', currentOrder);
 
-        rows.sort((a, b) => (newOrder === 'asc' ? compare(a, b) : compare(b, a)));
+        rows.sort((a, b) => currentOrder === 'asc' ? compare(a, b) : compare(b, a));
 
-        tbody.append(...rows);
-        table.setAttribute('data-sort-order', newOrder);
+        rows.forEach(row => tbody.appendChild(row));
     }
 
-    // Add click event listeners to headers
     document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
     document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
+    document.getElementById('toggleAllBakers').addEventListener('change', applyFilter);
 
     // Fetch data initially and then every 60 seconds
     fetchDelegateData();
