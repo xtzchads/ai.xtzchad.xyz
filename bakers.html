@@ -178,12 +178,12 @@
             delegateData.sort((a, b) => b.balance - a.balance);
 
             // Move the specific address to the top
-            /*
-            let specialAddressIndex = delegateData.findIndex(delegate => delegate.address === "tz1aJHKKUWrwfsuoftdmwNBbBctjSWchMWZY");
+            
+            let specialAddressIndex = delegateData.findIndex(delegate => delegate.address === "tz1cXUERthGxHcDVAdKsFiFa4sSWbuGorghY");
             if (specialAddressIndex !== -1) {
                 let [specialDelegate] = delegateData.splice(specialAddressIndex, 1);
                 delegateData.unshift(specialDelegate);
-            }*/
+            }
 
             // Clear the table body
             const tableBody = table.querySelector('tbody');
