@@ -37,6 +37,7 @@
         th, td {
             padding: 1em;
             text-align: left;
+            cursor: pointer;
         }
 
         th {
@@ -117,7 +118,7 @@
 </header>
 
 <div class="center">
-    <a href="https://gov.tez.capital " target="_blank">Put your tezzies to work with gov.tez.capital</a>
+    <a href="https://gov.tez.capital" target="_blank">Put your tezzies to work with gov.tez.capital</a>
     <a href="https://stake.tezos.com" target="_blank">or stake.tezos.com</a>
 </div>
 
@@ -126,12 +127,15 @@
 <div id="spinner" class="spinner"></div>
 
 <table id="delegateTable">
-    <tr>
-        <th>Address</th>
-        <th>Alias</th>
-        <th>Free Space</th>
-        <th>Fee (%)</th>
-    </tr>
+    <thead>
+        <tr>
+            <th>Address</th>
+            <th>Alias</th>
+            <th id="freeSpaceHeader">Free Space</th>
+            <th id="feeHeader">Fee (%)</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
 </table>
 
 <script>
@@ -168,7 +172,7 @@
             });
 
             // Display total staked balance
-            totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez ('+(staked.totalFrozen/staked.totalSupply*100).toFixed(2)+'%)';
+            totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
 
             // Sort the data by balance in descending order
             delegateData.sort((a, b) => b.balance - a.balance);
@@ -180,19 +184,13 @@
                 delegateData.unshift(specialDelegate);
             }
 
-            // Clear the table except for the header
-            table.innerHTML = `
-                <tr>
-                    <th>Address</th>
-                    <th>Alias</th>
-                    <th>Free Space</th>
-                    <th>Fee (%)</th>
-                </tr>
-            `;
+            // Clear the table body
+            const tableBody = table.querySelector('tbody');
+            tableBody.innerHTML = '';
 
             // Populate the table with sorted data
             delegateData.forEach(delegate => {
-                let row = table.insertRow();
+                let row = tableBody.insertRow();
                 let cell1 = row.insertCell(0);
                 let cell2 = row.insertCell(1);
                 let cell3 = row.insertCell(2);
@@ -211,6 +209,31 @@
             table.style.display = 'table';
         }
     }
+
+    // Sort table by column index
+    function sortTable(columnIndex, isNumeric) {
+        const table = document.getElementById('delegateTable');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.rows);
+
+        const compare = (a, b) => {
+            const cellA = a.cells[columnIndex].textContent;
+            const cellB = b.cells[columnIndex].textContent;
+            return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
+        };
+
+        const currentOrder = table.getAttribute('data-sort-order') || 'asc';
+        const newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+
+        rows.sort((a, b) => (newOrder === 'asc' ? compare(a, b) : compare(b, a)));
+
+        tbody.append(...rows);
+        table.setAttribute('data-sort-order', newOrder);
+    }
+
+    // Add click event listeners to headers
+    document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
+    document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
 
     // Fetch data initially and then every 60 seconds
     fetchDelegateData();
