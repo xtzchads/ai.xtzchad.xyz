@@ -276,6 +276,11 @@ async function fetchDelegateData() {
             let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
             allBakers.unshift(specialDelegate);
         }
+	specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1Yjryh3tpFHQG73dofJNatR21KUdRDu7mH");
+        if (specialAddressIndex !== -1) {
+            let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
+            allBakers.unshift(specialDelegate);
+        }    
 
         applyFilter();
 
