@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staking Assistant</title>
+    <script src="https://unpkg.com/@airgap/beacon-sdk@4.1.2/dist/walletbeacon.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #0F61FF;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            padding: 1em 0;
+        }
+
+        table {
+            width: 90%;
+            max-width: 1200px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 2em 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 1em;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        th {
+            background-color: #003EE0;
+            color: #fff;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        a {
+            color: #3b5998;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .center {
+            text-align: center;
+            margin: 1em 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0F61FF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2em auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+
+            table,
+            th,
+            td {
+                display: block;
+                width: 100%;
+            }
+
+            th,
+            td {
+                padding: 0.5em;
+            }
+
+            tr {
+                margin-bottom: 1em;
+                display: block;
+                border-bottom: 1px solid #ddd;
+            }
+
+            tr:last-child {
+                border-bottom: none;
+            }
+
+            th {
+                background-color: transparent;
+                color: #333;
+                text-transform: uppercase;
+                font-weight: bold;
+            }
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1em 0;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 10px;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #2196F3;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        #toggleLabel1,
+        #toggleLabel2 {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stake-input {
+            width: 100px;
+            padding: 0.5em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 0.5em;
+            margin-left: 0.5em;
+        }
+
+        .stake-button {
+            padding: 0.5em 1em;
+            background-color: #0F61FF;
+            color: #fff;
+            width: 100px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .stake-button:hover {
+            background-color: #003EE0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 20px;
+            background-color: #333;
+            color: #fff;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .notification.success {
+            background-color: #3CB371;
+            /* Success green */
+        }
+
+        .notification.error {
+            background-color: #DC143C;
+            /* Error red */
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+
+        #walletInfo {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 1em;
+            color: #fff;
+        }
+
+        header {
+            background-color: #0F61FF;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            padding: 1em 0;
+            position: relative;
+            /* Ensure header is relative for absolute positioning */
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Staking Assistant</h1>
+        <div id="walletInfo">
+    </header>
+    <div id="totalStakedBalance" class="center"></div>
+
+    <div class="center toggle-container">
+        <div class="toggle-group">
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleAllBakers">
+                <span class="slider round"></span>
+            </label>
+            <span id="toggleLabel1">Fees <= 40%</span>
+        </div>
+        <div class="toggle-group">
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleAliasBakers">
+                <span class="slider round"></span>
+            </label>
+            <span id="toggleLabel2">Public</span>
+        </div>
+    </div>
+
+    <div id="spinner" class="spinner"></div>
+    <div class="center" style="margin:0">
+        <p>Stake or unstake with your <b>current</b> baker. You have to delegate first.</p>
+    </div>
+    <div class="center">
+        <button class="stake-button" onclick="unstakeTez('${delegate.address}', this)">Unstake</button><input
+            type="number" class="stake-input" placeholder="Amount" min="0" step="0.000001"><button class="stake-button"
+            onclick="stakeTez('${delegate.address}', this)">Stake</button>
+    </div>
+    <table id="delegateTable">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Alias</th>
+                <th id="freeSpaceHeader">Free Space</th>
+                <th id="feeHeader">Fee (%)</th>
+                <th>Delegate</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let allBakers = [];
+        let filteredBakers = [];
+        let client;
+        let permissions;
+
+        async function fetchDelegateData() {
+            const spinner = document.getElementById('spinner');
+            const table = document.getElementById('delegateTable');
+            const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
+
+            spinner.style.display = 'block';
+            table.style.display = 'none';
+
+            try {
+                let bakers = await fetch('https://api.tzkt.io/v1/delegates?limit=10000&active=true');
+                let data = await bakers.json();
+                let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
+                let staked = await stats.json();
+
+                allBakers = [];
+                data.forEach(delegate => {
+                    if (delegate.limitOfStakingOverBaking && delegate.limitOfStakingOverBaking > 0) {
+                        let address = delegate.address;
+                        let alias = delegate.alias || 'No alias';
+                        let balance = ((delegate.stakedBalance * delegate.limitOfStakingOverBaking / 1000000 - delegate.externalStakedBalance) / 1000000).toFixed(6);
+                        let edgeOfBakingOverStaking = (delegate.edgeOfBakingOverStaking / 10000000).toFixed(2);
+
+                        allBakers.push({
+                            address: address,
+                            alias: alias,
+                            balance: parseInt(balance),
+                            edgeOfBakingOverStaking: edgeOfBakingOverStaking + "%"
+                        });
+                    }
+                });
+
+                // Display total staked balance
+                totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
+
+                // Sort the data by balance in descending order
+                allBakers.sort((a, b) => b.balance - a.balance);
+
+                // Move the specific address to the top
+                let specificAddress = 'tz1boot1ReQgAqyjV9RBZJ11HLwuA7NULZf9';
+                let specificIndex = allBakers.findIndex(delegate => delegate.address === specificAddress);
+                if (specificIndex !== -1) {
+                    let specificBaker = allBakers.splice(specificIndex, 1)[0];
+                    allBakers.unshift(specificBaker);
+                }
+
+                filteredBakers = allBakers;
+                applyFilter();
+            } catch (error) {
+                console.error('Error fetching delegate data:', error);
+            } finally {
+                spinner.style.display = 'none';
+                table.style.display = 'table';
+            }
+        }
+
+        function applyFilter() {
+            const table = document.getElementById('delegateTable');
+            const showAllBakers = document.getElementById('toggleAllBakers').checked;
+            const showAliasBakers = document.getElementById('toggleAliasBakers').checked;
+            const toggleLabel1 = document.getElementById('toggleLabel1');
+            const toggleLabel2 = document.getElementById('toggleLabel2');
+
+            filteredBakers = allBakers;
+
+            if (!showAllBakers) {
+                filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) <= 40);
+                toggleLabel1.textContent = "Fees <= 40%";
+            } else {
+                filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) > 40);
+                toggleLabel1.textContent = "Fees > 40%";
+            }
+
+            if (!showAliasBakers) {
+                toggleLabel2.textContent = "Public";
+                filteredBakers = filteredBakers.filter(delegate => delegate.alias !== 'No alias');
+            } else {
+                filteredBakers = filteredBakers.filter(delegate => delegate.alias === 'No alias');
+                toggleLabel2.textContent = "Private";
+            }
+
+            // Clear the table body
+            const tableBody = table.querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            // Populate the table with filtered data
+            filteredBakers.forEach(delegate => {
+                let row = tableBody.insertRow();
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let cell4 = row.insertCell(3);
+                let cell5 = row.insertCell(4);
+
+                cell1.textContent = delegate.address;
+                cell2.textContent = delegate.alias;
+                cell3.textContent = delegate.balance;
+                cell4.textContent = delegate.edgeOfBakingOverStaking;
+                cell5.innerHTML = "<button class=\"stake-button\" onclick=\"delegateTez('" + delegate.address + "', this)\">Delegate</button>";
+            });
+        }
+
+        // Sort table by column index
+        function sortTable(columnIndex, isNumeric) {
+            const table = document.getElementById('delegateTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
+
+            const compare = (a, b) => {
+                const cellA = a.cells[columnIndex].textContent;
+                const cellB = b.cells[columnIndex].textContent;
+                return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
+            };
+
+            const currentOrder = table.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+            table.setAttribute('data-sort-order', currentOrder);
+
+            rows.sort((a, b) => currentOrder === 'asc' ? compare(a, b) : compare(b, a));
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
+        document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
+        document.getElementById('toggleAllBakers').addEventListener('change', applyFilter);
+        document.getElementById('toggleAliasBakers').addEventListener('change', applyFilter);
+
+        // Fetch data initially and then every 60 seconds
+        fetchDelegateData();
+        setInterval(fetchDelegateData, 60000);
+        async function stakeTez(address, button) {
+            const input = button.previousElementSibling;
+            const amount = parseFloat(input.value);
+
+            try {
+                if (!permissions?.address) {
+                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    permissions = await client.requestPermissions();
+                    checkActiveSession();
+                }
+                const operation = [
+                    {
+                        amount: (amount * 1000000).toString(),
+                        kind: beacon.TezosOperationType.TRANSACTION,
+                        source: permissions.address,
+                        destination: permissions.address,
+                        parameters: {
+                            entrypoint: "stake",
+                            value: {
+                                "prim": "Unit",
+                            }
+                        }
+                    }
+                ];
+
+                const response = await client.requestOperation({operationDetails: operation});
+                showNotification("Successfully staked ${amount} tez to ${address}. Transaction hash: ${response.transactionHash}");
+                input.value = '';
+            } catch (error) {
+                console.error('Error staking tez:', error);
+                showNotification('Failed to stake tez. Please try again.', true);
+            }
+        }
+
+        async function unstakeTez(address, button) {
+            const input = button.nextElementSibling;
+            const amount = parseFloat(input.value);
+
+            try {
+                if (!permissions?.address) {
+                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    permissions = await client.requestPermissions();
+                    checkActiveSession();
+                }
+                const operation = [
+                    {
+                        amount: (amount * 1000000).toString(),
+                        kind: beacon.TezosOperationType.TRANSACTION,
+                        source: permissions.address,
+                        destination: permissions.address,
+                        parameters: {
+                            entrypoint: "unstake",
+                            value: {
+                                "prim": "Unit",
+                            }
+                        }
+                    }
+                ];
+
+                const response = await client.requestOperation({operationDetails: operation});
+                showNotification("Successfully unstaked ${amount} tez to ${address}. Transaction hash: ${response.transactionHash}");
+                input.value = '';
+            } catch (error) {
+                console.error('Error unstaking tez:', error);
+                showNotification('Failed to unstake tez. Please try again.', true);
+            }
+        }
+
+        async function delegateTez(address, button) {
+            try {
+                if (!permissions?.address) {
+                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    permissions = await client.requestPermissions();
+                    checkActiveSession();
+                }
+                const operation = [
+                    {
+                        kind: beacon.TezosOperationType.DELEGATION,
+                        delegate: address,
+                    }
+                ];
+
+                const response = await client.requestOperation({operationDetails: operation});
+                showNotification("Successfully delegated tez to ${address}. Transaction hash: ${response.transactionHash}");
+            } catch (error) {
+                console.error('Error delegating tez:', error);
+                showNotification('Failed to delegate tez. Please try again.', true);
+            }
+        }
+
+        function showNotification(message, isError = false) {
+            const notification = document.createElement('div');
+            notification.classList.add('notification', isError ? 'error' : 'success');
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            notification.offsetHeight;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 10000);
+        }
+
+        async function checkActiveSession() {
+            client = new beacon.DAppClient({name: 'Staking Assistant'});
+
+            const activeAccount = await client.getActiveAccount();
+            if (activeAccount) {
+                // Active session found
+                permissions = {address: activeAccount.address};
+                displayWalletInfo(activeAccount.address);
+            }
+        }
+
+        function displayWalletInfo(address) {
+            const walletInfoDiv = document.getElementById('walletInfo');
+            walletInfoDiv.innerHTML = `
+        <span>${address}</span>
+        <button class="stake-button" style="margin-left: 10px;" onclick="disconnectWallet()">Disconnect</button>
+    `;
+        }
+
+        async function disconnectWallet() {
+            await client.clearActiveAccount();
+            const walletInfoDiv = document.getElementById('walletInfo');
+            walletInfoDiv.innerHTML = '';
+            permissions = null;
+        }
+
+        document.addEventListener('DOMContentLoaded', checkActiveSession);
+    </script>
+
+</body>
+
+</html>
