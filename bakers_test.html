@@ -5,17 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staking Assistant</title>
-    <script src="https://unpkg.com/@airgap/beacon-sdk@4.2.2/dist/walletbeacon.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: "GT Eesti Pro Display Regular", sans-serif;
             background-color: #f4f4f9;
             color: #333;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            min-height: 100vh;
+            /* Ensure body takes at least full viewport height */
+        }
+
+        main {
+            flex-grow: 1;
+            /* Allow main content to grow and take remaining space */
+        }
+
+        footer {
+            background-color: #343a40;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            width: 100%;
+
+            bottom: 0;
+            /* Position the footer at the bottom of the viewport */
         }
 
         header {
@@ -24,297 +43,198 @@
             width: 100%;
             text-align: center;
             padding: 1em 0;
-        }
-
-        table {
-            width: 90%;
-            max-width: 1200px;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin: 2em 0;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        th,
-        td {
-            padding: 1em;
-            text-align: left;
-            cursor: pointer;
-        }
-
-        th {
-            background-color: #003EE0;
-            color: #fff;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-
-        a {
-            color: #3b5998;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .center {
-            text-align: center;
-            margin: 1em 0;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #0F61FF;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 2em auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media (max-width: 600px) {
-
-            table,
-            th,
-            td {
-                display: block;
-                width: 100%;
-            }
-
-            th,
-            td {
-                padding: 0.5em;
-            }
-
-            tr {
-                margin-bottom: 1em;
-                display: block;
-                border-bottom: 1px solid #ddd;
-            }
-
-            tr:last-child {
-                border-bottom: none;
-            }
-
-            th {
-                background-color: transparent;
-                color: #333;
-                text-transform: uppercase;
-                font-weight: bold;
-            }
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .toggle-group {
-            display: flex;
-            align-items: center;
-            margin-right: 20px;
-        }
-
-        .toggle-switch {
             position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-            margin-right: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .toggle-switch input {
-            display: none;
+        .main-content {
+            padding: 20px;
         }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: #2196F3;
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(26px);
-        }
-
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
-        }
-
-        #toggleLabel1,
-        #toggleLabel2 {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .stake-input {
-            width: 100px;
-            padding: 0.5em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 0.5em;
-            margin-left: 0.5em;
-        }
-
-        .stake-button {
-            padding: 0.5em 1em;
-            background-color: #0F61FF;
-            color: #fff;
-            width: 100px;
+        .card {
             border: none;
-            border-radius: 4px;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background-color: #0F61FF;
+            border-color: #0F61FF;
+        }
+
+        .btn-primary:hover {
+            background-color: #003EE0;
+            border-color: #003EE0;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .table {
+            font-size: 0.9rem;
+        }
+
+        .form-check-input:checked {
+            background-color: #0F61FF;
+            border-color: #0F61FF;
+        }
+
+        .form-check-input:checked+.form-check-label {
+            color: #0F61FF;
+        }
+
+        .form-check-label {
             cursor: pointer;
         }
 
-        .stake-button:hover {
-            background-color: #003EE0;
+        .badge {
+            font-size: 0.8rem;
         }
+
 
         .notification {
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             padding: 10px 20px;
-            border-radius: 20px;
-            background-color: #333;
+            background-color: #4CAF50;
             color: #fff;
-            font-size: 16px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            border-radius: 5px;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .notification.success {
-            background-color: #3CB371;
-            /* Success green */
+            transition: opacity 0.3s ease;
+            z-index: 999;
         }
 
         .notification.error {
-            background-color: #DC143C;
-            /* Error red */
+            background-color: #f44336;
         }
 
         .notification.show {
             opacity: 1;
-        }
-
-        #walletInfo {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            right: 1em;
-            color: #fff;
-        }
-
-        header {
-            background-color: #0F61FF;
-            color: #fff;
-            width: 100%;
-            text-align: center;
-            padding: 1em 0;
-            position: relative;
-            /* Ensure header is relative for absolute positioning */
         }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>Staking Assistant</h1>
-        <div id="walletInfo">
+    <header class="bg-primary py-3">
+        <div class="container">
+            <h1 class="text-white mb-0">Staking Assistant</h1>
+        </div>
     </header>
-    <div id="totalStakedBalance" class="center"></div>
 
-    <div id="spinner" class="spinner"></div>
-    <div class="center" style="margin:0">
-        <p>Stake or unstake with your <b>current</b> baker. You have to delegate first.</p>
-    </div>
-    <div class="center">
-        <button class="stake-button" onclick="unstakeTez('${delegate.address}', this)">Unstake</button><input
-            type="number" class="stake-input" placeholder="Amount" min="0" step="0.000001"><button class="stake-button"
-            onclick="stakeTez('${delegate.address}', this)">Stake</button>
-    </div>
-<div class="center">
-    <a href="https://gov.tez.capital" target="_blank">Alternatively, stake your tezzies with gov.tez.capital</a>
-    <a href="https://stake.tezos.com" target="_blank">or stake.tezos.com</a>
-</div>
-<div class="center toggle-container">
-        <div class="toggle-group">
-            <label class="toggle-switch">
-                <input type="checkbox" id="toggleAllBakers">
-                <span class="slider round"></span>
-            </label>
-            <span id="toggleLabel1">Fees <= 40%</span>
-        </div>
-        <div class="toggle-group">
-            <label class="toggle-switch">
-                <input type="checkbox" id="toggleAliasBakers">
-                <span class="slider round"></span>
-            </label>
-            <span id="toggleLabel2">Public</span>
-        </div>
-    </div>
-    <table id="delegateTable">
-        <thead>
-            <tr>
-                <th>Address</th>
-                <th>Alias</th>
-                <th id="freeSpaceHeader">Free Space</th>
-                <th id="feeHeader">Fee (%)</th>
-                <th>Delegate</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="text-center">
+                            <h4 class="mb-4">Stake or unstake your tezzies with your <b>current</b> baker.</h4>
+                        </div>
 
+                        <div class="row align-items-center mt-4">
+                            <div class="col-md-2"></div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <input type="number" class="form-control form-control-md" id="amountInput"
+                                    placeholder="Amount">
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary btn-md w-100" onclick="stakeTez()">Stake</button>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-secondary btn-md w-100" onclick="unstakeTez()">Unstake</button>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title mb-3">Available Bakers</h5>
+                            </div>
+                            <div class="col-auto">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" checked="checked"
+                                        id="toggleAllBakers" onchange="applyFilter()">
+                                    <label class="form-check-label" for="toggleAllBakers">Low fees</label>
+
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" checked="checked"
+                                        id="toggleAliasBakers" onchange="applyFilter()">
+                                    <label class="form-check-label" for="toggleAliasBakers">Public bakers</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table table-striped table-hover" id="delegateTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Address</th>
+                                    <th scope="col">Alias</th>
+                                    <th id="freeSpaceHeader" scope="col" style="cursor: pointer;">Free Space</th>
+                                    <th id="feeHeader" scope="col" style="cursor: pointer;">Fee (%)</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows will be dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div id="wallet" style="display:none" class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="text-center mb-3" id="walletInfo">
+                            <!-- Wallet info will be dynamically populated -->
+                        </div>
+                        <button class="btn btn-outline-danger mt-3 w-100" onclick="disconnectWallet()">Disconnect
+                            Wallet</button>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Alternative options to stake</h5>
+                        <ul class="list-unstyled mt-3 mb-0">
+                            <li><a href="https://gov.tez.capital" target="_blank">gov.tez.capital</a></li>
+                            <li><a href="https://stake.tezos.com" target="_blank">stake.tezos.com</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-3 mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 Staking Assistant. All chads reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Beacon SDK -->
+    <script src="https://unpkg.com/@airgap/beacon-sdk@4.2.2/dist/walletbeacon.min.js"></script>
+    <!-- Custom JavaScript -->
     <script>
         let allBakers = [];
         let filteredBakers = [];
@@ -322,18 +242,20 @@
         let permissions;
 
         async function fetchDelegateData() {
-            const spinner = document.getElementById('spinner');
+            const freeSpaceHeader = document.getElementById('freeSpaceHeader');
+            const feeHeader = document.getElementById('feeHeader');
+            //const spinner = document.getElementById('spinner');
             const table = document.getElementById('delegateTable');
-            const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
+            //const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
 
-            spinner.style.display = 'block';
+            //spinner.style.display = 'block';
             table.style.display = 'none';
 
             try {
                 let bakers = await fetch('https://api.tzkt.io/v1/delegates?limit=10000&active=true');
                 let data = await bakers.json();
-                let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
-                let staked = await stats.json();
+                //let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
+                //let staked = await stats.json();
 
                 allBakers = [];
                 data.forEach(delegate => {
@@ -353,56 +275,71 @@
                 });
 
                 // Display total staked balance
-                totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
+                //totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
 
                 // Sort the data by balance in descending order
                 allBakers.sort((a, b) => b.balance - a.balance);
 
-                        // Move the specific address to the top
-        let specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1cXUERthGxHcDVAdKsFiFa4sSWbuGorghY");
-        if (specialAddressIndex !== -1) {
-            let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
-            allBakers.unshift(specialDelegate);
-        }
-	specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1Yjryh3tpFHQG73dofJNatR21KUdRDu7mH");
-        if (specialAddressIndex !== -1) {
-            let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
-            allBakers.unshift(specialDelegate);
-        }    
+                // Move the specific address to the top
+                let specificAddress = 'tz1boot1ReQgAqyjV9RBZJ11HLwuA7NULZf9';
+                let specificIndex = allBakers.findIndex(delegate => delegate.address === specificAddress);
+                if (specificIndex !== -1) {
+                    let specificBaker = allBakers.splice(specificIndex, 1)[0];
+                    allBakers.unshift(specificBaker);
+                }
 
                 filteredBakers = allBakers;
                 applyFilter();
             } catch (error) {
                 console.error('Error fetching delegate data:', error);
             } finally {
-                spinner.style.display = 'none';
+                //spinner.style.display = 'none';
                 table.style.display = 'table';
             }
+            let sortDirection = {
+                freeSpace: 'desc',
+                fee: 'desc'
+            };
+            freeSpaceHeader.addEventListener('click', () => {
+                if (sortDirection.freeSpace === 'desc') {
+                    allBakers.sort((a, b) => a.balance - b.balance);
+                    sortDirection.freeSpace = 'asc';
+                } else {
+                    allBakers.sort((a, b) => b.balance - a.balance);
+                    sortDirection.freeSpace = 'desc';
+                }
+                applyFilter();
+            });
+
+            feeHeader.addEventListener('click', () => {
+                if (sortDirection.fee === 'desc') {
+                    allBakers.sort((a, b) => a.edgeOfBakingOverStaking.slice(0, -1) - b.edgeOfBakingOverStaking.slice(0, -1));
+                    sortDirection.fee = 'asc';
+                } else {
+                    allBakers.sort((a, b) => b.edgeOfBakingOverStaking.slice(0, -1) - a.edgeOfBakingOverStaking.slice(0, -1));
+                    sortDirection.fee = 'desc';
+                }
+                applyFilter();
+            });
         }
 
         function applyFilter() {
             const table = document.getElementById('delegateTable');
             const showAllBakers = document.getElementById('toggleAllBakers').checked;
             const showAliasBakers = document.getElementById('toggleAliasBakers').checked;
-            const toggleLabel1 = document.getElementById('toggleLabel1');
-            const toggleLabel2 = document.getElementById('toggleLabel2');
 
             filteredBakers = allBakers;
 
-            if (!showAllBakers) {
+            if (showAllBakers) {
                 filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) <= 40);
-                toggleLabel1.textContent = "Fees <= 40%";
             } else {
                 filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) > 40);
-                toggleLabel1.textContent = "Fees > 40%";
             }
 
-            if (!showAliasBakers) {
-                toggleLabel2.textContent = "Public";
+            if (showAliasBakers) {
                 filteredBakers = filteredBakers.filter(delegate => delegate.alias !== 'No alias');
             } else {
                 filteredBakers = filteredBakers.filter(delegate => delegate.alias === 'No alias');
-                toggleLabel2.textContent = "Private";
             }
 
             // Clear the table body
@@ -422,7 +359,7 @@
                 cell2.textContent = delegate.alias;
                 cell3.textContent = delegate.balance;
                 cell4.textContent = delegate.edgeOfBakingOverStaking;
-                cell5.innerHTML = "<button class=\"stake-button\" onclick=\"delegateTez('" + delegate.address + "', this)\">Delegate</button>";
+                cell5.innerHTML = "<button class=\"btn btn-primary btn-sm w-100\" onclick=\"delegateTez('" + delegate.address + "', this)\">Delegate</button>";
             });
         }
 
@@ -446,17 +383,12 @@
             rows.forEach(row => tbody.appendChild(row));
         }
 
-        document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
-        document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
         document.getElementById('toggleAllBakers').addEventListener('change', applyFilter);
         document.getElementById('toggleAliasBakers').addEventListener('change', applyFilter);
 
-        // Fetch data initially and then every 60 seconds
-        fetchDelegateData();
-        setInterval(fetchDelegateData, 60000);
-        async function stakeTez(address, button) {
-            const input = button.previousElementSibling;
-            const amount = parseFloat(input.value);
+        async function stakeTez() {
+            const amountInput = document.getElementById('amountInput');
+            const amount = parseFloat(amountInput.value);
 
             try {
                 if (!permissions?.address) {
@@ -473,24 +405,24 @@
                         parameters: {
                             entrypoint: "stake",
                             value: {
-                                "prim": "Unit",
+                                "prim": "Unit"
                             }
                         }
                     }
                 ];
 
                 const response = await client.requestOperation({operationDetails: operation});
-                showNotification("Successfully staked ${amount} tez to ${address}. Transaction hash: ${response.transactionHash}");
-                input.value = '';
+                showNotification(`Successfully staked ${amount} tez. Transaction hash: ${response.transactionHash}`);
+                amountInput.value = '';
             } catch (error) {
                 console.error('Error staking tez:', error);
                 showNotification('Failed to stake tez. Please try again.', true);
             }
         }
 
-        async function unstakeTez(address, button) {
-            const input = button.nextElementSibling;
-            const amount = parseFloat(input.value);
+        async function unstakeTez() {
+            const amountInput = document.getElementById('amountInput');
+            const amount = parseFloat(amountInput.value);
 
             try {
                 if (!permissions?.address) {
@@ -507,22 +439,22 @@
                         parameters: {
                             entrypoint: "unstake",
                             value: {
-                                "prim": "Unit",
+                                "prim": "Unit"
                             }
                         }
                     }
                 ];
 
                 const response = await client.requestOperation({operationDetails: operation});
-                showNotification("Successfully unstaked ${amount} tez to ${address}. Transaction hash: ${response.transactionHash}");
-                input.value = '';
+                showNotification(`Successfully unstaked ${amount} tez. Transaction hash: ${response.transactionHash}`);
+                amountInput.value = '';
             } catch (error) {
                 console.error('Error unstaking tez:', error);
                 showNotification('Failed to unstake tez. Please try again.', true);
             }
         }
 
-        async function delegateTez(address, button) {
+        async function delegateTez(address) {
             try {
                 if (!permissions?.address) {
                     client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
@@ -537,7 +469,7 @@
                 ];
 
                 const response = await client.requestOperation({operationDetails: operation});
-                showNotification("Successfully delegated tez to ${address}. Transaction hash: ${response.transactionHash}");
+                showNotification(`Successfully delegated tez to ${address}. Transaction hash: ${response.transactionHash}`);
             } catch (error) {
                 console.error('Error delegating tez:', error);
                 showNotification('Failed to delegate tez. Please try again.', true);
@@ -561,21 +493,22 @@
 
         async function checkActiveSession() {
             client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
-
+            const walletInfoDiv = document.getElementById('wallet');
             const activeAccount = await client.getActiveAccount();
             if (activeAccount) {
                 // Active session found
                 permissions = {address: activeAccount.address};
+                wallet.style.display = 'flex';
                 displayWalletInfo(activeAccount.address);
             }
+            else
+                wallet.style.display = 'none'; // Hide walletInfo if no active session
+
         }
 
         function displayWalletInfo(address) {
             const walletInfoDiv = document.getElementById('walletInfo');
-            walletInfoDiv.innerHTML = `
-        <span>${address}</span>
-        <button class="stake-button" style="margin-left: 10px;" onclick="disconnectWallet()">Disconnect</button>
-    `;
+            walletInfoDiv.innerHTML = `<span>${address}</span>`;
         }
 
         async function disconnectWallet() {
@@ -584,6 +517,10 @@
             walletInfoDiv.innerHTML = '';
             permissions = null;
         }
+
+        // Initial fetch and periodic update
+        fetchDelegateData();
+        setInterval(fetchDelegateData, 60000);
 
         document.addEventListener('DOMContentLoaded', checkActiveSession);
     </script>
