@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staking Assistant</title>
-    <script src="https://unpkg.com/@airgap/beacon-sdk@4.1.2/dist/walletbeacon.min.js"></script>
+    <script src="https://unpkg.com/@airgap/beacon-sdk@4.2.2/dist/walletbeacon.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -454,7 +454,7 @@
 
             try {
                 if (!permissions?.address) {
-                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
                     permissions = await client.requestPermissions();
                     checkActiveSession();
                 }
@@ -488,7 +488,7 @@
 
             try {
                 if (!permissions?.address) {
-                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
                     permissions = await client.requestPermissions();
                     checkActiveSession();
                 }
@@ -519,7 +519,7 @@
         async function delegateTez(address, button) {
             try {
                 if (!permissions?.address) {
-                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
                     permissions = await client.requestPermissions();
                     checkActiveSession();
                 }
@@ -554,7 +554,7 @@
         }
 
         async function checkActiveSession() {
-            client = new beacon.DAppClient({name: 'Staking Assistant'});
+            client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
 
             const activeAccount = await client.getActiveAccount();
             if (activeAccount) {
