@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staking Assistant</title>
-    <script src="https://unpkg.com/@airgap/beacon-sdk@4.2.2/dist/walletbeacon.min.js"></script>
+    <script src="https://unpkg.com/@airgap/beacon-sdk@4.1.2/dist/walletbeacon.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -267,249 +268,320 @@
 
 <body>
 
-<header>
-    <h1>Staking Assistant</h1>
-    <div id="walletInfo"></div>
-</header>
+    <header>
+        <h1>Staking Assistant</h1>
+        <div id="walletInfo">
+    </header>
+    <div id="totalStakedBalance" class="center"></div>
 
-<div id="totalStakedBalance" class="center"></div>
-
-<div class="center toggle-container">
-    <div class="toggle-group">
-        <label class="toggle-switch">
-            <input type="checkbox" id="toggleAllBakers">
-            <span class="slider round"></span>
-        </label>
-        <span id="toggleLabel1">Fees <= 40%</span>
+    <div class="center toggle-container">
+        <div class="toggle-group">
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleAllBakers">
+                <span class="slider round"></span>
+            </label>
+            <span id="toggleLabel1">Fees <= 40%</span>
+        </div>
+        <div class="toggle-group">
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleAliasBakers">
+                <span class="slider round"></span>
+            </label>
+            <span id="toggleLabel2">Public</span>
+        </div>
     </div>
-    <div class="toggle-group">
-        <label class="toggle-switch">
-            <input type="checkbox" id="toggleAliasBakers">
-            <span class="slider round"></span>
-        </label>
-        <span id="toggleLabel2">Public</span>
+
+    <div id="spinner" class="spinner"></div>
+    <div class="center" style="margin:0">
+        <p>Stake or unstake with your <b>current</b> baker. You have to delegate first.</p>
     </div>
-</div>
+    <div class="center">
+        <button class="stake-button" onclick="unstakeTez('${delegate.address}', this)">Unstake</button><input
+            type="number" class="stake-input" placeholder="Amount" min="0" step="0.000001"><button class="stake-button"
+            onclick="stakeTez('${delegate.address}', this)">Stake</button>
+    </div>
+    <table id="delegateTable">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Alias</th>
+                <th id="freeSpaceHeader">Free Space</th>
+                <th id="feeHeader">Fee (%)</th>
+                <th>Delegate</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
-<div id="spinner" class="spinner"></div>
+    <script>
+        let allBakers = [];
+        let filteredBakers = [];
+        let client;
+        let permissions;
 
-<div class="center" style="margin:0">
-    <p>Stake or unstake with your <b>current</b> baker. You have to delegate first.</p>
-</div>
+        async function fetchDelegateData() {
+            const spinner = document.getElementById('spinner');
+            const table = document.getElementById('delegateTable');
+            const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
 
-<div class="center">
-    <button class="stake-button" onclick="unstakeTez('${delegate.address}', this)">Unstake</button>
-    <input type="number" class="stake-input" placeholder="Amount" min="0" step="0.000001">
-    <button class="stake-button" onclick="stakeTez('${delegate.address}', this)">Stake</button>
-</div>
+            spinner.style.display = 'block';
+            table.style.display = 'none';
 
-<table id="delegateTable">
-    <thead>
-        <tr>
-            <th>Address</th>
-            <th>Alias</th>
-            <th id="freeSpaceHeader">Free Space</th>
-            <th id="feeHeader">Fee (%)</th>
-            <th>Delegate</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+            try {
+                let bakers = await fetch('https://api.tzkt.io/v1/delegates?limit=10000&active=true');
+                let data = await bakers.json();
+                let stats = await fetch('https://api.tzkt.io/v1/statistics/current');
+                let staked = await stats.json();
 
-<script>
-    let allBakers = [];
-    let filteredBakers = [];
-    let client; // Declare a single client instance
-    let permissions;
+                allBakers = [];
+                data.forEach(delegate => {
+                    if (delegate.limitOfStakingOverBaking && delegate.limitOfStakingOverBaking > 0) {
+                        let address = delegate.address;
+                        let alias = delegate.alias || 'No alias';
+                        let balance = ((delegate.stakedBalance * delegate.limitOfStakingOverBaking / 1000000 - delegate.externalStakedBalance) / 1000000).toFixed(6);
+                        let edgeOfBakingOverStaking = (delegate.edgeOfBakingOverStaking / 10000000).toFixed(2);
 
-    async function fetchDelegateData() {
-        const spinner = document.getElementById('spinner');
-        const table = document.getElementById('delegateTable');
-        const totalStakedBalanceDiv = document.getElementById('totalStakedBalance');
+                        allBakers.push({
+                            address: address,
+                            alias: alias,
+                            balance: parseInt(balance),
+                            edgeOfBakingOverStaking: edgeOfBakingOverStaking + "%"
+                        });
+                    }
+                });
 
-        spinner.style.display = 'block';
-        table.style.display = 'none';
+                // Display total staked balance
+                totalStakedBalanceDiv.textContent = 'Total Staked Balance: ' + parseInt(staked.totalFrozen / 1000000).toLocaleString() + ' tez (' + (staked.totalFrozen / staked.totalSupply * 100).toFixed(2) + '%)';
 
-        try {
-            let bakers = await fetch('https://api.tzkt.io/v1/delegates?limit=1000&columns=status&select=status.active').then(response => response.json());
+                // Sort the data by balance in descending order
+                allBakers.sort((a, b) => b.balance - a.balance);
 
-            allBakers = bakers.filter(baker => {
-                if (baker.status.active && (!document.getElementById('toggleAllBakers').checked || baker.fee <= 40)) {
-                    return true;
+                // Move the specific address to the top
+                let specificAddress = 'tz1boot1ReQgAqyjV9RBZJ11HLwuA7NULZf9';
+                let specificIndex = allBakers.findIndex(delegate => delegate.address === specificAddress);
+                if (specificIndex !== -1) {
+                    let specificBaker = allBakers.splice(specificIndex, 1)[0];
+                    allBakers.unshift(specificBaker);
                 }
-                return false;
-            });
+
+                filteredBakers = allBakers;
+                applyFilter();
+            } catch (error) {
+                console.error('Error fetching delegate data:', error);
+            } finally {
+                spinner.style.display = 'none';
+                table.style.display = 'table';
+            }
+        }
+
+        function applyFilter() {
+            const table = document.getElementById('delegateTable');
+            const showAllBakers = document.getElementById('toggleAllBakers').checked;
+            const showAliasBakers = document.getElementById('toggleAliasBakers').checked;
+            const toggleLabel1 = document.getElementById('toggleLabel1');
+            const toggleLabel2 = document.getElementById('toggleLabel2');
+
             filteredBakers = allBakers;
 
-            let totalStakedBalance = 0;
-            let tableHtml = '';
+            if (!showAllBakers) {
+                filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) <= 40);
+                toggleLabel1.textContent = "Fees <= 40%";
+            } else {
+                filteredBakers = filteredBakers.filter(delegate => parseFloat(delegate.edgeOfBakingOverStaking) > 40);
+                toggleLabel1.textContent = "Fees > 40%";
+            }
 
-            filteredBakers.forEach(baker => {
-                totalStakedBalance += baker.stakingBalance;
-                tableHtml += `<tr><td>${baker.address}</td><td>${baker.alias ? baker.alias : '-'}</td><td>${(baker.freeSpace / 1000000).toFixed(2)}</td><td>${baker.fee}</td><td><button onclick="delegate('${baker.address}')">Delegate</button></td></tr>`;
+            if (!showAliasBakers) {
+                toggleLabel2.textContent = "Public";
+                filteredBakers = filteredBakers.filter(delegate => delegate.alias !== 'No alias');
+            } else {
+                filteredBakers = filteredBakers.filter(delegate => delegate.alias === 'No alias');
+                toggleLabel2.textContent = "Private";
+            }
+
+            // Clear the table body
+            const tableBody = table.querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            // Populate the table with filtered data
+            filteredBakers.forEach(delegate => {
+                let row = tableBody.insertRow();
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let cell4 = row.insertCell(3);
+                let cell5 = row.insertCell(4);
+
+                cell1.textContent = delegate.address;
+                cell2.textContent = delegate.alias;
+                cell3.textContent = delegate.balance;
+                cell4.textContent = delegate.edgeOfBakingOverStaking;
+                cell5.innerHTML = "<button class=\"stake-button\" onclick=\"delegateTez('" + delegate.address + "', this)\">Delegate</button>";
             });
-
-            totalStakedBalanceDiv.innerHTML = `Total Staked Balance: ${(totalStakedBalance / 1000000).toFixed(2)} ꜩ`;
-            document.querySelector('#delegateTable tbody').innerHTML = tableHtml;
-
-            spinner.style.display = 'none';
-            table.style.display = 'table';
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            showNotification('Failed to fetch delegate data', 'error');
         }
-    }
 
-    async function delegate(address) {
-        const spinner = document.getElementById('spinner');
-        spinner.style.display = 'block';
+        // Sort table by column index
+        function sortTable(columnIndex, isNumeric) {
+            const table = document.getElementById('delegateTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
 
-        try {
-            const operation = await client.requestOperation({
-                operationDetails: [
+            const compare = (a, b) => {
+                const cellA = a.cells[columnIndex].textContent;
+                const cellB = b.cells[columnIndex].textContent;
+                return isNumeric ? parseFloat(cellA) - parseFloat(cellB) : cellA.localeCompare(cellB);
+            };
+
+            const currentOrder = table.getAttribute('data-sort-order') === 'asc' ? 'desc' : 'asc';
+            table.setAttribute('data-sort-order', currentOrder);
+
+            rows.sort((a, b) => currentOrder === 'asc' ? compare(a, b) : compare(b, a));
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        document.getElementById('freeSpaceHeader').addEventListener('click', () => sortTable(2, true));
+        document.getElementById('feeHeader').addEventListener('click', () => sortTable(3, true));
+        document.getElementById('toggleAllBakers').addEventListener('change', applyFilter);
+        document.getElementById('toggleAliasBakers').addEventListener('change', applyFilter);
+
+        // Fetch data initially and then every 60 seconds
+        fetchDelegateData();
+        setInterval(fetchDelegateData, 60000);
+        async function stakeTez(address, button) {
+            const input = button.previousElementSibling;
+            const amount = parseFloat(input.value);
+
+            try {
+                if (!permissions?.address) {
+                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    permissions = await client.requestPermissions();
+                    checkActiveSession();
+                }
+                const operation = [
                     {
-                        kind: beacon.OperationKind.DELEGATION,
+                        amount: (amount * 1000000).toString(),
+                        kind: beacon.TezosOperationType.TRANSACTION,
+                        source: permissions.address,
+                        destination: permissions.address,
+                        parameters: {
+                            entrypoint: "stake",
+                            value: {
+                                "prim": "Unit",
+                            }
+                        }
+                    }
+                ];
+
+                const response = await client.requestOperation({operationDetails: operation});
+                showNotification("Successfully staked ${amount} tez to ${address}. Transaction hash: ${response.transactionHash}");
+                input.value = '';
+            } catch (error) {
+                console.error('Error staking tez:', error);
+                showNotification('Failed to stake tez. Please try again.', true);
+            }
+        }
+
+        async function unstakeTez(address, button) {
+            const input = button.nextElementSibling;
+            const amount = parseFloat(input.value);
+
+            try {
+                if (!permissions?.address) {
+                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    permissions = await client.requestPermissions();
+                    checkActiveSession();
+                }
+                const operation = [
+                    {
+                        amount: (amount * 1000000).toString(),
+                        kind: beacon.TezosOperationType.TRANSACTION,
+                        source: permissions.address,
+                        destination: permissions.address,
+                        parameters: {
+                            entrypoint: "unstake",
+                            value: {
+                                "prim": "Unit",
+                            }
+                        }
+                    }
+                ];
+
+                const response = await client.requestOperation({operationDetails: operation});
+                showNotification("Successfully unstaked ${amount} tez to ${address}. Transaction hash: ${response.transactionHash}");
+                input.value = '';
+            } catch (error) {
+                console.error('Error unstaking tez:', error);
+                showNotification('Failed to unstake tez. Please try again.', true);
+            }
+        }
+
+        async function delegateTez(address, button) {
+            try {
+                if (!permissions?.address) {
+                    client = new beacon.DAppClient({name: 'Staking Assistant'});
+                    permissions = await client.requestPermissions();
+                    checkActiveSession();
+                }
+                const operation = [
+                    {
+                        kind: beacon.TezosOperationType.DELEGATION,
                         delegate: address,
-                    },
-                ],
-            });
+                    }
+                ];
 
-            await operation.confirmation();
-
-            spinner.style.display = 'none';
-            showNotification('Successfully delegated to ' + address, 'success');
-        } catch (error) {
-            console.error('Error delegating:', error);
-            showNotification('Failed to delegate to ' + address, 'error');
-        }
-    }
-
-    async function unstakeTez(address, button) {
-        const amount = parseFloat(button.previousElementSibling.value);
-
-        if (!amount || amount <= 0) {
-            showNotification('Please enter a valid amount', 'error');
-            return;
+                const response = await client.requestOperation({operationDetails: operation});
+                showNotification("Successfully delegated tez to ${address}. Transaction hash: ${response.transactionHash}");
+            } catch (error) {
+                console.error('Error delegating tez:', error);
+                showNotification('Failed to delegate tez. Please try again.', true);
+            }
         }
 
-        const spinner = document.getElementById('spinner');
-        spinner.style.display = 'block';
-
-        try {
-            const operation = await client.requestOperation({
-                operationDetails: [
-                    {
-                        kind: beacon.OperationKind.UNSTAKE,
-                        amount: amount * 1000000,
-                    },
-                ],
-            });
-
-            await operation.confirmation();
-
-            spinner.style.display = 'none';
-            showNotification('Successfully unstaked ' + amount + ' ꜩ', 'success');
-        } catch (error) {
-            console.error('Error unstaking:', error);
-            showNotification('Failed to unstake ' + amount + ' ꜩ', 'error');
-        }
-    }
-
-    async function stakeTez(address, button) {
-        const amount = parseFloat(button.previousElementSibling.value);
-
-        if (!amount || amount <= 0) {
-            showNotification('Please enter a valid amount', 'error');
-            return;
-        }
-
-        const spinner = document.getElementById('spinner');
-        spinner.style.display = 'block';
-
-        try {
-            const operation = await client.requestOperation({
-                operationDetails: [
-                    {
-                        kind: beacon.OperationKind.STAKE,
-                        amount: amount * 1000000,
-                    },
-                ],
-            });
-
-            await operation.confirmation();
-
-            spinner.style.display = 'none';
-            showNotification('Successfully staked ' + amount + ' ꜩ', 'success');
-        } catch (error) {
-            console.error('Error staking:', error);
-            showNotification('Failed to stake ' + amount + ' ꜩ', 'error');
-        }
-    }
-
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.textContent = message;
-        notification.classList.add('notification', type, 'show');
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.classList.remove('show');
+        function showNotification(message, isError = false) {
+            const notification = document.createElement('div');
+            notification.classList.add('notification', isError ? 'error' : 'success');
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            notification.offsetHeight;
+            notification.classList.add('show');
             setTimeout(() => {
-                notification.remove();
-            }, 500);
-        }, 3000);
-    }
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 10000);
+        }
 
-    async function initBeacon() {
-        try {
-            const dappClient = new beacon.DAppClient({ name: 'Staking Assistant' });
-            client = dappClient; // Assign the client instance
-
-            const activeNetwork = await client.getActiveNetwork();
-            console.log('Active network:', activeNetwork);
-
-            client.addEventListener(beacon.ClientEvent.PERMISSIONS_UPDATE, async (permissions) => {
-                console.log('Permissions update:', permissions);
-                permissions = permissions; // Update permissions
-                await fetchDelegateData();
-            });
-
-            client.addEventListener(beacon.ClientEvent.ACTIVE_ACCOUNT_CHANGE, async (account) => {
-                console.log('Active account change:', account);
-                showWalletInfo(account);
-                await fetchDelegateData();
-            });
+        async function checkActiveSession() {
+            client = new beacon.DAppClient({name: 'Staking Assistant'});
 
             const activeAccount = await client.getActiveAccount();
             if (activeAccount) {
-                console.log('Active account:', activeAccount);
-                showWalletInfo(activeAccount);
-            } else {
-                showNotification('No active account found', 'error');
+                // Active session found
+                permissions = {address: activeAccount.address};
+                displayWalletInfo(activeAccount.address);
             }
-
-            await client.requestPermissions({
-                network: {
-                    type: beacon.NetworkType.CARTHAGENET,
-                },
-            });
-
-            await fetchDelegateData();
-        } catch (error) {
-            console.error('Error initializing Beacon SDK:', error);
-            showNotification('Failed to initialize Beacon SDK', 'error');
         }
-    }
 
-    function showWalletInfo(account) {
-        const walletInfoDiv = document.getElementById('walletInfo');
-        walletInfoDiv.innerHTML = `Current Wallet: ${account.address}`;
-    }
+        function displayWalletInfo(address) {
+            const walletInfoDiv = document.getElementById('walletInfo');
+            walletInfoDiv.innerHTML = `
+        <span>${address}</span>
+        <button class="stake-button" style="margin-left: 10px;" onclick="disconnectWallet()">Disconnect</button>
+    `;
+        }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initBeacon();
-    });
-</script>
+        async function disconnectWallet() {
+            await client.clearActiveAccount();
+            const walletInfoDiv = document.getElementById('walletInfo');
+            walletInfoDiv.innerHTML = '';
+            permissions = null;
+        }
+
+        document.addEventListener('DOMContentLoaded', checkActiveSession);
+    </script>
 
 </body>
+
 </html>
