@@ -356,13 +356,17 @@
                 // Sort the data by balance in descending order
                 allBakers.sort((a, b) => b.balance - a.balance);
 
-                // Move the specific address to the top
-                let specificAddress = 'tz1boot1ReQgAqyjV9RBZJ11HLwuA7NULZf9';
-                let specificIndex = allBakers.findIndex(delegate => delegate.address === specificAddress);
-                if (specificIndex !== -1) {
-                    let specificBaker = allBakers.splice(specificIndex, 1)[0];
-                    allBakers.unshift(specificBaker);
-                }
+                        // Move the specific address to the top
+        let specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1cXUERthGxHcDVAdKsFiFa4sSWbuGorghY");
+        if (specialAddressIndex !== -1) {
+            let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
+            allBakers.unshift(specialDelegate);
+        }
+	specialAddressIndex = allBakers.findIndex(delegate => delegate.address === "tz1Yjryh3tpFHQG73dofJNatR21KUdRDu7mH");
+        if (specialAddressIndex !== -1) {
+            let [specialDelegate] = allBakers.splice(specialAddressIndex, 1);
+            allBakers.unshift(specialDelegate);
+        }    
 
                 filteredBakers = allBakers;
                 applyFilter();
