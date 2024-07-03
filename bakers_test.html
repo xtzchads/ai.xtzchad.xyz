@@ -274,7 +274,16 @@
     </header>
     <div id="totalStakedBalance" class="center"></div>
 
-    <div class="center toggle-container">
+    <div id="spinner" class="spinner"></div>
+    <div class="center" style="margin:0">
+        <p>Stake or unstake with your <b>current</b> baker. You have to delegate first.</p>
+    </div>
+    <div class="center">
+        <button class="stake-button" onclick="unstakeTez('${delegate.address}', this)">Unstake</button><input
+            type="number" class="stake-input" placeholder="Amount" min="0" step="0.000001"><button class="stake-button"
+            onclick="stakeTez('${delegate.address}', this)">Stake</button>
+    </div>
+<div class="center toggle-container">
         <div class="toggle-group">
             <label class="toggle-switch">
                 <input type="checkbox" id="toggleAllBakers">
@@ -289,16 +298,6 @@
             </label>
             <span id="toggleLabel2">Public</span>
         </div>
-    </div>
-
-    <div id="spinner" class="spinner"></div>
-    <div class="center" style="margin:0">
-        <p>Stake or unstake with your <b>current</b> baker. You have to delegate first.</p>
-    </div>
-    <div class="center">
-        <button class="stake-button" onclick="unstakeTez('${delegate.address}', this)">Unstake</button><input
-            type="number" class="stake-input" placeholder="Amount" min="0" step="0.000001"><button class="stake-button"
-            onclick="stakeTez('${delegate.address}', this)">Stake</button>
     </div>
     <table id="delegateTable">
         <thead>
