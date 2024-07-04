@@ -271,7 +271,7 @@
 
                         allBakers.push({
                             address: address,
-                            alias: alias,
+                            alias: "<a href='https://tzkt.io/"+address+"' target='_blank'>"+alias+"</a>",
                             balance: parseInt(balance),
                             edgeOfBakingOverStaking: edgeOfBakingOverStaking + "%"
                         });
@@ -283,14 +283,6 @@
 
                 // Sort the data by balance in descending order
                 allBakers.sort((a, b) => b.balance - a.balance);
-
-                // Move the specific address to the top
-                let specificAddress = 'tz1boot1ReQgAqyjV9RBZJ11HLwuA7NULZf9';
-                let specificIndex = allBakers.findIndex(delegate => delegate.address === specificAddress);
-                if (specificIndex !== -1) {
-                    let specificBaker = allBakers.splice(specificIndex, 1)[0];
-                    allBakers.unshift(specificBaker);
-                }
 
                 filteredBakers = allBakers;
                 applyFilter();
