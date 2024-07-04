@@ -238,8 +238,12 @@
     <script>
         let allBakers = [];
         let filteredBakers = [];
-        let client;
+        let client = new beacon.DAppClient({name: 'Staking Assistant'});
         let permissions;
+		client.subscribeToEvent(beacon.BeaconEvent.ACTIVE_ACCOUNT_SET, (account) => {
+  // An active account has been set, update the dApp UI
+  checkActiveSession();
+});
 
         async function fetchDelegateData() {
             const freeSpaceHeader = document.getElementById('freeSpaceHeader');
@@ -392,7 +396,6 @@
 
             try {
                 if (!permissions?.address) {
-                    client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
                     permissions = await client.requestPermissions();
                     checkActiveSession();
                 }
@@ -426,7 +429,6 @@
 
             try {
                 if (!permissions?.address) {
-                    client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
                     permissions = await client.requestPermissions();
                     checkActiveSession();
                 }
@@ -457,7 +459,6 @@
         async function delegateTez(address) {
             try {
                 if (!permissions?.address) {
-                    client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
                     permissions = await client.requestPermissions();
                     checkActiveSession();
                 }
@@ -492,7 +493,6 @@
         }
 
         async function checkActiveSession() {
-            client = beacon.getDAppClientInstance({name: 'Staking Assistant'});
             const walletInfoDiv = document.getElementById('wallet');
             const activeAccount = await client.getActiveAccount();
             if (activeAccount) {
