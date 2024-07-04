@@ -352,7 +352,7 @@
                 let cell5 = row.insertCell(4);
 
                 cell1.textContent = delegate.address;
-                cell2.textContent = delegate.alias;
+                cell2.innerHTML = delegate.alias;
                 cell3.textContent = delegate.balance;
                 cell4.textContent = delegate.edgeOfBakingOverStaking;
                 cell5.innerHTML = "<button class=\"btn btn-primary btn-sm w-100\" onclick=\"delegateTez('" + delegate.address + "', this)\">Delegate</button>";
