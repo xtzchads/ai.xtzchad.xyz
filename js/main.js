@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })),
         lineWidth: 3,
         marker: {
-          radius: 1
+          enabled: false
         },
       }],
       credits: {
