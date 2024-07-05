@@ -208,6 +208,18 @@ document.addEventListener('DOMContentLoaded', function () {
           y: issuanceRate(index + 748, value)
         })),
         lineWidth: 3,
+		dataLabels: {
+            enabled: true,
+            formatter: function () {
+                if (this.point.index === this.series.data.length - 1) {
+                    return `${this.y.toFixed(2)+"%"}`;
+                }
+                return null;
+            },
+            align: 'right',
+            verticalAlign: 'middle',
+            
+        },
         marker: {
           enabled: false
         },
@@ -287,6 +299,18 @@ document.addEventListener('DOMContentLoaded', function () {
           x: index + 748,
           y: stakedRatio(index + 1, value)
         })),
+		dataLabels: {
+            enabled: true,
+            formatter: function () {
+                if (this.point.index === this.series.data.length - 1) {
+                    return `${(this.y*100).toFixed(2)+"%"}`;
+                }
+                return null;
+            },
+            align: 'right',
+            verticalAlign: 'middle',
+            
+        },
         lineWidth: 3,
         marker: {
           enabled: false
@@ -419,7 +443,19 @@ document.addEventListener('DOMContentLoaded', function () {
               width: 10
             },
             name: 'Burned Supply',
-            data: seriesData
+            data: seriesData,
+			dataLabels: {
+            enabled: true,
+            formatter: function () {
+                if (this.point.index === 0) {
+                    return `${(this.y/1000000).toFixed(2)+"M"}`;
+                }
+                return null;
+            },
+            align: 'right',
+            verticalAlign: 'middle',
+            
+        },
           }],
           credits: {
             enabled: false
@@ -509,7 +545,19 @@ document.addEventListener('DOMContentLoaded', function () {
               width: 10
             },
             name: 'Total Accounts',
-            data: seriesData
+            data: seriesData,
+			dataLabels: {
+            enabled: true,
+            formatter: function () {
+                if (this.point.index === 0) {
+                    return `${(this.y/1000000).toFixed(2)+"M"}`;
+                }
+                return null;
+            },
+            align: 'right',
+            verticalAlign: 'middle',
+            
+           }
           }],
           credits: {
             enabled: false
