@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         seriesData.reverse();
 
-        Highcharts.chart('chart-container', {
+        Highcharts.chart('chart-container2', {
           chart: {
             type: 'spline',
             backgroundColor: 'rgba(0,0,0,0)'
