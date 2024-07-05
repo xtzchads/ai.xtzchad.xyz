@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var cumulativeSum = 0;
 
         data.reverse().forEach(item => {
-          var value = Math.abs(parseInt(item.value) / 1000000);
+          var value = parseInt(Math.abs(parseInt(item.value) / 1000000));
           cumulativeSum += value;
           seriesData.push([new Date(item.ts * 1000).getTime(), cumulativeSum]);
         });
