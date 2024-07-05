@@ -1,6 +1,7 @@
 const transition_period = 50;
 const initial_period = 10;
 const ai_activation_cycle = 748;
+let currentCycle;
 
 function computeExtremum(cycle, initial_value, final_value) {
   const trans = transition_period + 1;
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return fetchCycleCount()
       .then(count => {
         cycleCount = count;
-        const currentCycle = cycleCount - 4;
+        currentCycle = cycleCount - 4;
         const startCycle = 748;
         let ratios = [];
         let last = 0;
@@ -116,10 +117,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         while (ratios.length < 100) {
+		  last=last+calculateAverageDifference(ratios);
           ratios.push(last);
+		  
         }
         return ratios;
       });
+	  function calculateAverageDifference(arr) {
+  return arr.reduce((sum, val, idx, array) =>
+    idx > 0 ? sum + Math.abs(val - array[idx - 1]) : 0, 0) / (arr.length - 1);
+}
   }
 
   let ratio;
@@ -286,6 +293,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     },
       series: [{
+		zoneAxis: 'x',
+        zones: [{
+            value: currentCycle
+        }, {
+            dashStyle: 'ShortDot'
+        }],
         shadow: {
           color: 'rgba(255, 255, 0, 0.7)',
           offsetX: 0,
@@ -333,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function () {
               [1, '#ff6961']
             ]
           },
-          stickyTracking: false,
+          stickyTracking: true,
           dragDrop: {
             draggableY: true,
             dragMaxY: 1,
