@@ -410,5 +410,95 @@ document.addEventListener('DOMContentLoaded', function () {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
+	  
+	  fetch('https://stats.dipdup.net/v1/histogram/accounts_stats/max/week?field=Total&size=1000')
+      .then(response => response.json())
+      .then(data => {
+        var seriesData = [];
+        var cumulativeSum = 0;
+
+        data.reverse().forEach(item => {
+          var value = Math.abs(parseInt(item.value) / 1000000);
+          seriesData.push([new Date(item.ts * 1000).getTime(), value]);
+        });
+
+        seriesData.reverse();
+
+        Highcharts.chart('chart-container', {
+          chart: {
+            type: 'spline',
+            backgroundColor: 'rgba(0,0,0,0)'
+          },
+          title: {
+            text: 'Total Accounts',
+            style: {
+              color: '#ffffff'
+            }
+          },
+          xAxis: {
+            type: 'datetime',
+            lineColor: '#ffffff',
+            lineWidth: 1,
+            labels: {
+              enabled: false
+            }
+          },
+          yAxis: {
+            gridLineWidth: 0,
+            title: {
+              text: null
+            },
+            labels: {
+              enabled: false
+            }
+          },
+          plotOptions: {
+            series: {
+              marker: {
+                enabled: false
+              },
+              lineWidth: 2,
+              states: {
+                hover: {
+                  lineWidthPlus: 0
+                }
+              },
+              color: {
+                linearGradient: {
+                  x1: 0,
+                  y1: 0,
+                  x2: 0,
+                  y2: 1
+                },
+                stops: [
+                  [0, '#77dd77'],
+                  [1, '#ff6961']
+                ]
+              }
+            }
+          },
+          exporting: {
+            enabled: false
+          },
+          series: [{
+            showInLegend: false,
+            shadow: {
+              color: 'rgba(255, 255, 0, 0.7)',
+              offsetX: 0,
+              offsetY: 0,
+              opacity: 1,
+              width: 10
+            },
+            name: 'Total Accounts',
+            data: seriesData
+          }],
+          credits: {
+            enabled: false
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
   }
 });
