@@ -1,4 +1,4 @@
-# Tezos Blockchain Visualization
+# Chad Charts
 
 This project visualizes various metrics related to the Tezos blockchain, including issuance rates, staking ratios, burned supply, and total accounts over time. It uses Highcharts.js to create interactive and visually appealing charts.
 
