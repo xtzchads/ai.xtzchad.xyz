@@ -172,6 +172,15 @@ document.addEventListener('DOMContentLoaded', function () {
         max: 11,
         tickInterval: 1
       },
+	  tooltip: {
+		formatter: function () {
+            const cycle = this.x;
+            const seriesName = this.series.name;
+            const originalYValue = this.y;
+            const modifiedYValue = (originalYValue).toFixed(2)+"%";
+            return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
+        }
+    },
       series: [{
         showInLegend: false,
         shadow: {
@@ -255,6 +264,15 @@ document.addEventListener('DOMContentLoaded', function () {
         max: 1,
         tickInterval: 0.2
       },
+	  tooltip: {
+		formatter: function () {
+            const cycle = this.x;
+            const seriesName = this.series.name;
+            const originalYValue = this.y;
+            const modifiedYValue = (originalYValue * 100).toFixed(2)+"%";
+            return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
+        }
+    },
       series: [{
         shadow: {
           color: 'rgba(255, 255, 0, 0.7)',
