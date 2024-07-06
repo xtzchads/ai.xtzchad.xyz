@@ -410,7 +410,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
             },
         type: 'datetime',
         title: {
-          text: 'Date',
+          text: null,
           style: {
             color: '#ffffff'
           }
@@ -421,7 +421,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
               enabled: false
             },
         title: {
-          text: 'Account Count',
+          text: null,
           style: {
             color: '#ffffff'
           }
