@@ -520,7 +520,7 @@ Highcharts.chart('chart-container5', {
 	subtitle: {
         text: '(based on projected staking ratio distance from equilibrium using sigmoid function)', // Text for the subtitle
         style: {
-            fontSize: '8px', // Adjust the font size of the subtitle
+            fontSize: '10px', // Adjust the font size of the subtitle
             color: '#ffffff' // Optionally adjust the color of the subtitle text
         }
 	},
