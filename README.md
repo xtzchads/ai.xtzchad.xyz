@@ -8,6 +8,7 @@ This project visualizes various metrics related to the Tezos blockchain, includi
 - **Staking Ratio Chart**: Shows the staking ratio with draggable points to customize and see the effect on the issuance rate.
 - **Burned Supply Chart**: Cumulative sum of the burned supply over time.
 - **Total Accounts Chart**: Total number of accounts over time.
+- **TezBullMeter**: Based on distance from forecasted staking ratio over 100 cycles to 50% staking equilibrium using sigmoid function.
 
 ## Dependencies
 
