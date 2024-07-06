@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
 fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleared_accounts&end_date=now&fill=none&collapse=1M&limit=75', {
   headers: {
     'X-Api-Key': 'JK6F9IDTM330VW6O8W0303JPVLEY57Z',
-	'Content-Type': 'application/json'
+    'Content-Type': 'application/json'
   }
 })
   .then(response => response.json())
@@ -393,6 +393,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
       x: new Date(item[0]).getTime(),
       y: -item[2]
     }));
+
     Highcharts.chart('chart-container4', {
       chart: {
         type: 'column',
@@ -405,9 +406,9 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
         }
       },
       xAxis: {
-	      labels: {
-              enabled: false
-            },
+        labels: {
+          enabled: false
+        },
         type: 'datetime',
         title: {
           text: null,
@@ -417,9 +418,9 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
         }
       },
       yAxis: {
-	      labels: {
-              enabled: false
-            },
+        labels: {
+          enabled: false
+        },
         title: {
           text: null,
           style: {
@@ -430,30 +431,54 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
       },
       series: [
         {
-	showInLegend: false,
-            shadow: {
-              color: 'rgba(255, 255, 0, 0.7)',
-              offsetX: 0,
-              offsetY: 0,
-              opacity: 1,
-              width: 10
-            },
+          showInLegend: false,
+          shadow: {
+            color: 'rgba(255, 255, 0, 0.7)',
+            offsetX: 0,
+            offsetY: 0,
+            opacity: 1,
+            width: 10
+          },
           name: 'Funded Accounts',
           data: fundedSeries,
-          color: '#77dd77',
+          color: {
+            linearGradient: {
+              x1: 0,
+              y1: 0,
+              x2: 0,
+              y2: 1
+            },
+            stops: [
+              [0, '#77dd77'],
+              [1, '#ff6961']
+            ]
+          },
+          borderWidth: 0
         },
         {
-		showInLegend: false,
-            shadow: {
-              color: 'rgba(255, 255, 0, 0.7)',
-              offsetX: 0,
-              offsetY: 0,
-              opacity: 1,
-              width: 10
-            },
+          showInLegend: false,
+          shadow: {
+            color: 'rgba(255, 255, 0, 0.7)',
+            offsetX: 0,
+            offsetY: 0,
+            opacity: 1,
+            width: 10
+          },
           name: 'Cleared Accounts',
           data: clearedSeries,
-          color: '#ff6961',
+          color: {
+            linearGradient: {
+              x1: 0,
+              y1: 0,
+              x2: 0,
+              y2: 1
+            },
+            stops: [
+              [0, '#ff6961'],
+              [1, '#77dd77']
+            ]
+          },
+          borderWidth: 0
         }
       ],
       credits: {
@@ -464,6 +489,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
   .catch(error => {
     console.error('Error fetching account data:', error);
   });
+
 
 
     fetch('https://stats.dipdup.net/v1/histogram/balance_update/sum/month?field=Update&Kind=2&size=1000')
