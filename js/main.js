@@ -419,7 +419,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
       yAxis: {
 	      labels: {
               enabled: false
-            }
+            },
         title: {
           text: 'Account Count',
           style: {
