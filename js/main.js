@@ -512,11 +512,17 @@ Highcharts.chart('chart-container5', {
     },
 
     title: {
-        text: 'TezBullMeter<br>(based on projected staking ratio distance from equilibrium using sigmoid function)',
+        text: 'TezBullMeter',
         style: {
             color: '#ffffff' // Title text color
         }
     },
+	subtitle: {
+        text: '(based on projected staking ratio distance from equilibrium using sigmoid function)', // Text for the subtitle
+        style: {
+            fontSize: '8px', // Adjust the font size of the subtitle
+            color: '#ffffff' // Optionally adjust the color of the subtitle text
+        }
 
     pane: {
         startAngle: -90,
