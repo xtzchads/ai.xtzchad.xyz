@@ -374,6 +374,86 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
+	
+	// New Chart Code
+fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleared_accounts&end_date=now&fill=none&collapse=1M&limit=75', {
+  headers: {
+    'X-Api-Key': 'JK6F9IDTM330VW6O8W0303JPVLEY57Z',
+	'Content-Type': 'application/json'
+  }
+})
+  .then(response => response.json())
+  .then(data => {
+    const fundedSeries = data.map(item => ({
+      x: new Date(item[0]).getTime(),
+      y: item[1]
+    }));
+
+    const clearedSeries = data.map(item => ({
+      x: new Date(item[0]).getTime(),
+      y: -item[2]
+    }));
+
+    Highcharts.chart('chart-container-4', {
+      chart: {
+        type: 'column',
+        backgroundColor: 'rgba(0,0,0,0)'
+      },
+      title: {
+        text: 'Funded/Cleared accounts',
+        style: {
+          color: '#ffffff'
+        }
+      },
+      xAxis: {
+        type: 'datetime',
+        labels: {
+          style: {
+            color: '#ffffff'
+          }
+        },
+        title: {
+          text: 'Date',
+          style: {
+            color: '#ffffff'
+          }
+        }
+      },
+      yAxis: {
+        title: {
+          text: 'Account Count',
+          style: {
+            color: '#ffffff'
+          }
+        },
+        labels: {
+          style: {
+            color: '#ffffff'
+          }
+        },
+        gridLineColor: '#444444'
+      },
+      series: [
+        {
+          name: 'Funded Accounts',
+          data: fundedSeries,
+          color: '#77dd77',
+        },
+        {
+          name: 'Cleared Accounts',
+          data: clearedSeries,
+          color: '#ff6961',
+        }
+      ],
+      credits: {
+        enabled: false
+      }
+    });
+  })
+  .catch(error => {
+    console.error('Error fetching account data:', error);
+  });
+
 
     fetch('https://stats.dipdup.net/v1/histogram/balance_update/sum/month?field=Update&Kind=2&size=1000')
       .then(response => response.json())
