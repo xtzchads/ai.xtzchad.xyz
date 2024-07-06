@@ -129,6 +129,13 @@ document.addEventListener('DOMContentLoaded', function () {
 }
   }
 
+function calculateIndicator(stakingRatio) {
+    const idealRatio = 0.5; 
+    const k = 4; 
+    const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
+    return parseInt(indicator);
+	}
+
   let ratio;
 
   if (location.hash != "") {
@@ -492,7 +499,100 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
     console.error('Error fetching account data:', error);
   });
 
+Highcharts.chart('chart-container5', {
+    chart: {
+        type: 'gauge',
+        plotBackgroundColor: null,
+        plotBackgroundImage: null,
+        plotBorderWidth: 0,
+        plotShadow: true, // Set plotShadow to false for no shadow
+        backgroundColor: 'rgba(0,0,0,0)', // Transparent background
+    },
 
+    title: {
+        text: 'TezBullMeter<br><font size="8px">(based on projected staking ratio distance from equilibrium using sigmoid function)</font>',
+        style: {
+            color: '#ffffff' // Title text color
+        }
+    },
+
+    pane: {
+        startAngle: -90,
+        endAngle: 89.9,
+        background: null,
+        center: ['50%', '75%'],
+        size: '110%'
+    },
+
+    // the value axis
+    yAxis: {
+        min: 0,
+        max: 100,
+        tickPixelInterval: 72,
+        tickPosition: 'inside',
+        tickColor: '#ffffff', // Tick color
+        tickLength: 20,
+        tickWidth: 2,
+        minorTickInterval: null,
+        labels: {
+            distance: 20,
+            style: {
+                fontSize: '14px',
+                color: '#ffffff' // Label text color
+            }
+        },
+        lineWidth: 0,
+        plotBands: [{
+            from: 0,
+            to: 40,
+            color: '#DF5353', // Red color
+            thickness: 20,
+            borderRadius: '50%'
+        }, {
+            from: 65,
+            to: 100,
+            color: '#55BF3B', // Green color
+            thickness: 20,
+            borderRadius: '50%'
+        }, {
+            from: 30,
+            to: 70,
+            color: '#DDDF0D', // Yellow color
+            thickness: 20,
+        }]
+    },
+
+    series: [{
+        name: '',
+        data: [calculateIndicator(forecasted)],
+        tooltip: {
+            valueSuffix: '% Moon'
+        },
+        dataLabels: {
+            format: '{y}% Moon',
+            borderWidth: 0,
+            color: '#ffffff', // Data label text color
+            style: {
+                fontSize: '16px'
+            }
+        },
+        dial: {
+            radius: '80%',
+            backgroundColor: 'gray',
+            baseWidth: 12,
+            baseLength: '0%',
+            rearLength: '0%'
+        },
+        pivot: {
+            backgroundColor: 'gray',
+            radius: 6
+        }
+    }],
+	credits: {
+            enabled: false
+          }
+
+});
 
     fetch('https://stats.dipdup.net/v1/histogram/balance_update/sum/month?field=Update&Kind=2&size=1000')
       .then(response => response.json())
