@@ -79,7 +79,7 @@ function issuanceRate(cycle, value) {
   return clip(totalRate, ratioMin, ratioMax) * 100;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
   function fetchCycleCount() {
     return fetch('https://api.tzkt.io/v1/cycles/count')
       .then(response => response.json());
@@ -118,25 +118,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         while (ratios.length < 100) {
-		  last=last+calculateAverageDifference(ratios);
+          last = last + calculateAverageDifference(ratios);
           ratios.push(last);
-		  
+
         }
-	forecasted=ratios[ratios.length-1];
+        forecasted = ratios[ratios.length - 1];
         return ratios;
       });
-	  function calculateAverageDifference(arr) {
-  return arr.reduce((sum, val, idx, array) =>
-    idx > 0 ? sum + Math.abs(val - array[idx - 1]) : 0, 0) / (arr.length - 1);
-}
+    function calculateAverageDifference(arr) {
+      return arr.reduce((sum, val, idx, array) =>
+        idx > 0 ? sum + Math.abs(val - array[idx - 1]) : 0, 0) / (arr.length - 1);
+    }
   }
 
-function calculateIndicator(stakingRatio) {
-    const idealRatio = 0.5; 
-    const k = 4; 
+  function calculateIndicator(stakingRatio) {
+    const idealRatio = 0.5;
+    const k = 4;
     const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
     return parseInt(indicator);
-	}
+  }
 
   let ratio;
 
@@ -188,15 +188,15 @@ function calculateIndicator(stakingRatio) {
         max: 11,
         tickInterval: 1
       },
-	  tooltip: {
-		formatter: function () {
-            const cycle = this.x;
-            const seriesName = this.series.name;
-            const originalYValue = this.y;
-            const modifiedYValue = (originalYValue).toFixed(2)+"%";
-            return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
+      tooltip: {
+        formatter: function() {
+          const cycle = this.x;
+          const seriesName = this.series.name;
+          const originalYValue = this.y;
+          const modifiedYValue = (originalYValue).toFixed(2) + "%";
+          return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
         }
-    },
+      },
       series: [{
         showInLegend: false,
         shadow: {
@@ -224,17 +224,17 @@ function calculateIndicator(stakingRatio) {
           y: issuanceRate(index + 748, value)
         })),
         lineWidth: 3,
-		dataLabels: {
-            enabled: true,
-            formatter: function () {
-                if (this.point.index === this.series.data.length - 1) {
-                    return `${this.y.toFixed(2)+"%"}`;
-                }
-                return null;
-            },
-            align: 'right',
-            verticalAlign: 'middle',
-            
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            if (this.point.index === this.series.data.length - 1) {
+              return `${this.y.toFixed(2) + "%"}`;
+            }
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'middle',
+
         },
         marker: {
           enabled: false
@@ -292,21 +292,21 @@ function calculateIndicator(stakingRatio) {
         max: 1,
         tickInterval: 0.2
       },
-	  tooltip: {
-		formatter: function () {
-            const cycle = this.x;
-            const seriesName = this.series.name;
-            const originalYValue = this.y;
-            const modifiedYValue = (originalYValue * 100).toFixed(2)+"%";
-            return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
+      tooltip: {
+        formatter: function() {
+          const cycle = this.x;
+          const seriesName = this.series.name;
+          const originalYValue = this.y;
+          const modifiedYValue = (originalYValue * 100).toFixed(2) + "%";
+          return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
         }
-    },
+      },
       series: [{
-		zoneAxis: 'x',
+        zoneAxis: 'x',
         zones: [{
-            value: currentCycle
+          value: currentCycle
         }, {
-            dashStyle: 'ShortDot'
+          dashStyle: 'ShortDot'
         }],
         shadow: {
           color: 'rgba(255, 255, 0, 0.7)',
@@ -321,17 +321,17 @@ function calculateIndicator(stakingRatio) {
           x: index + 748,
           y: stakedRatio(index + 1, value)
         })),
-		dataLabels: {
-            enabled: true,
-            formatter: function () {
-                if (this.point.index === this.series.data.length - 1) {
-                    return `${(this.y*100).toFixed(2)+"%"}`;
-                }
-                return null;
-            },
-            align: 'right',
-            verticalAlign: 'middle',
-            
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            if (this.point.index === this.series.data.length - 1) {
+              return `${(this.y * 100).toFixed(2) + "%"}`;
+            }
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'middle',
+
         },
         lineWidth: 3,
         marker: {
@@ -364,7 +364,7 @@ function calculateIndicator(stakingRatio) {
           },
           point: {
             events: {
-              drag: function (e) {
+              drag: function(e) {
                 const point = e.target;
                 const newValue = e.newPoint.y;
                 const series = point.series;
@@ -383,157 +383,157 @@ function calculateIndicator(stakingRatio) {
         }
       }
     });
-	
-	// New Chart Code
-fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleared_accounts&end_date=now&fill=none&collapse=1M&limit=75', {
-  headers: {
-    'X-Api-Key': 'JK6F9IDTM330VW6O8W0303JPVLEY57Z',
-    'Content-Type': 'application/json'
-  }
-})
-  .then(response => response.json())
-  .then(data => {
-    const fundedSeries = data.map(item => ({
-      x: new Date(item[0]).getTime(),
-      y: item[1]
-    }));
 
-    const clearedSeries = data.map(item => ({
-      x: new Date(item[0]).getTime(),
-      y: -item[2]
-    }));
-
-    Highcharts.chart('chart-container4', {
-      chart: {
-        type: 'column',
-        backgroundColor: 'rgba(0,0,0,0)'
-      },
-      title: {
-        text: 'Funded/Cleared accounts',
-        style: {
-          color: '#ffffff'
-        }
-      },
-      xAxis: {
-	lineColor: '#ffffff',
-        labels: {
-          enabled: false
-        },
-        type: 'datetime',
-        title: {
-          text: null,
-          style: {
-            color: '#ffffff'
-          }
-        }
-      },
-      yAxis: {
-	gridLineWidth: 0,
-        labels: {
-          enabled: false
-        },
-        title: {
-          text: null,
-          style: {
-            color: '#ffffff'
-          }
-        },
-        gridLineColor: '#444444'
-      },
-      series: [
-        {
-          showInLegend: false,
-          shadow: {
-            color: 'rgba(255, 255, 0, 0.7)',
-            offsetX: 0,
-            offsetY: 0,
-            opacity: 1,
-            width: 10
-          },
-          name: 'Funded Accounts',
-          data: fundedSeries,
-          color: {
-            linearGradient: {
-              x1: 0,
-              y1: 0,
-              x2: 0,
-              y2: 1
-            },
-            stops: [
-              [0, '#77dd77'],
-              [1, '#77dd77']
-            ]
-          },
-          borderWidth: 0
-        },
-        {
-          showInLegend: false,
-          shadow: {
-            color: 'rgba(255, 255, 0, 0.7)',
-            offsetX: 0,
-            offsetY: 0,
-            opacity: 1,
-            width: 10
-          },
-          name: 'Cleared Accounts',
-          data: clearedSeries,
-          color: {
-            linearGradient: {
-              x1: 0,
-              y1: 0,
-              x2: 0,
-              y2: 1
-            },
-            stops: [
-              [0, '#ff6961'],
-              [1, '#ff6961']
-            ]
-          },
-          borderWidth: 0
-        }
-      ],
-      credits: {
-        enabled: false
+    // New Chart Code
+    fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleared_accounts&end_date=now&fill=none&collapse=1M&limit=75', {
+      headers: {
+        'X-Api-Key': 'JK6F9IDTM330VW6O8W0303JPVLEY57Z',
+        'Content-Type': 'application/json'
       }
-    });
-  })
-  .catch(error => {
-    console.error('Error fetching account data:', error);
-  });
+    })
+      .then(response => response.json())
+      .then(data => {
+        const fundedSeries = data.map(item => ({
+          x: new Date(item[0]).getTime(),
+          y: item[1]
+        }));
 
-Highcharts.chart('chart-container5', {
-    chart: {
+        const clearedSeries = data.map(item => ({
+          x: new Date(item[0]).getTime(),
+          y: -item[2]
+        }));
+
+        Highcharts.chart('chart-container4', {
+          chart: {
+            type: 'column',
+            backgroundColor: 'rgba(0,0,0,0)'
+          },
+          title: {
+            text: 'Funded/Cleared accounts',
+            style: {
+              color: '#ffffff'
+            }
+          },
+          xAxis: {
+            lineColor: '#ffffff',
+            labels: {
+              enabled: false
+            },
+            type: 'datetime',
+            title: {
+              text: null,
+              style: {
+                color: '#ffffff'
+              }
+            }
+          },
+          yAxis: {
+            gridLineWidth: 0,
+            labels: {
+              enabled: false
+            },
+            title: {
+              text: null,
+              style: {
+                color: '#ffffff'
+              }
+            },
+            gridLineColor: '#444444'
+          },
+          series: [
+            {
+              showInLegend: false,
+              shadow: {
+                color: 'rgba(255, 255, 0, 0.7)',
+                offsetX: 0,
+                offsetY: 0,
+                opacity: 1,
+                width: 10
+              },
+              name: 'Funded Accounts',
+              data: fundedSeries,
+              color: {
+                linearGradient: {
+                  x1: 0,
+                  y1: 0,
+                  x2: 0,
+                  y2: 1
+                },
+                stops: [
+                  [0, '#77dd77'],
+                  [1, '#77dd77']
+                ]
+              },
+              borderWidth: 0
+            },
+            {
+              showInLegend: false,
+              shadow: {
+                color: 'rgba(255, 255, 0, 0.7)',
+                offsetX: 0,
+                offsetY: 0,
+                opacity: 1,
+                width: 10
+              },
+              name: 'Cleared Accounts',
+              data: clearedSeries,
+              color: {
+                linearGradient: {
+                  x1: 0,
+                  y1: 0,
+                  x2: 0,
+                  y2: 1
+                },
+                stops: [
+                  [0, '#ff6961'],
+                  [1, '#ff6961']
+                ]
+              },
+              borderWidth: 0
+            }
+          ],
+          credits: {
+            enabled: false
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching account data:', error);
+      });
+
+    Highcharts.chart('chart-container5', {
+      chart: {
         type: 'gauge',
         plotBackgroundColor: null,
         plotBackgroundImage: null,
         plotBorderWidth: 0,
         plotShadow: true, // Set plotShadow to false for no shadow
         backgroundColor: 'rgba(0,0,0,0)', // Transparent background
-    },
+      },
 
-    title: {
+      title: {
         text: 'TezBullMeter',
         style: {
-            color: '#ffffff' // Title text color
+          color: '#ffffff' // Title text color
         }
-    },
-	subtitle: {
+      },
+      subtitle: {
         text: '(based on projected staking ratio distance from equilibrium using sigmoid function)', // Text for the subtitle
         style: {
-            fontSize: '0.75em', // Adjust the font size of the subtitle
-            color: '#ffffff' // Optionally adjust the color of the subtitle text
+          fontSize: '0.75em', // Adjust the font size of the subtitle
+          color: '#ffffff' // Optionally adjust the color of the subtitle text
         }
-	},
+      },
 
-    pane: {
+      pane: {
         startAngle: -90,
         endAngle: 89.9,
         background: null,
         center: ['50%', '75%'],
-    },
+      },
 
-    // the value axis
-    yAxis: {
+      // the value axis
+      yAxis: {
         min: 0,
         max: 100,
         tickPixelInterval: 72,
@@ -543,64 +543,64 @@ Highcharts.chart('chart-container5', {
         tickWidth: 2,
         minorTickInterval: null,
         labels: {
-            distance: 20,
-            style: {
-                fontSize: '14px',
-                color: '#ffffff' // Label text color
-            }
+          distance: 20,
+          style: {
+            fontSize: '14px',
+            color: '#ffffff' // Label text color
+          }
         },
         lineWidth: 0,
         plotBands: [{
-            from: 0,
-            to: 40,
-            color: '#DF5353', // Red color
-            thickness: 20,
-            borderRadius: '50%'
+          from: 0,
+          to: 40,
+          color: '#DF5353', // Red color
+          thickness: 20,
+          borderRadius: '50%'
         }, {
-            from: 65,
-            to: 100,
-            color: '#55BF3B', // Green color
-            thickness: 20,
-            borderRadius: '50%'
+          from: 65,
+          to: 100,
+          color: '#55BF3B', // Green color
+          thickness: 20,
+          borderRadius: '50%'
         }, {
-            from: 30,
-            to: 70,
-            color: '#DDDF0D', // Yellow color
-            thickness: 20,
+          from: 30,
+          to: 70,
+          color: '#DDDF0D', // Yellow color
+          thickness: 20,
         }]
-    },
+      },
 
-    series: [{
+      series: [{
         name: '',
         data: [calculateIndicator(forecasted)],
         tooltip: {
-            valueSuffix: '% Moon'
+          valueSuffix: '% Moon'
         },
         dataLabels: {
-            format: '{y}% Moon',
-            borderWidth: 0,
-            color: '#ffffff', // Data label text color
-            style: {
-                fontSize: '16px'
-            }
+          format: '{y}% Moon',
+          borderWidth: 0,
+          color: '#ffffff', // Data label text color
+          style: {
+            fontSize: '16px'
+          }
         },
         dial: {
-            radius: '80%',
-            backgroundColor: 'gray',
-            baseWidth: 12,
-            baseLength: '0%',
-            rearLength: '0%'
+          radius: '80%',
+          backgroundColor: 'gray',
+          baseWidth: 12,
+          baseLength: '0%',
+          rearLength: '0%'
         },
         pivot: {
-            backgroundColor: 'gray',
-            radius: 6
+          backgroundColor: 'gray',
+          radius: 6
         }
-    }],
-	credits: {
-            enabled: false
-          }
+      }],
+      credits: {
+        enabled: false
+      }
 
-});
+    });
 
     fetch('https://stats.dipdup.net/v1/histogram/balance_update/sum/month?field=Update&Kind=2&size=1000')
       .then(response => response.json())
@@ -611,7 +611,7 @@ Highcharts.chart('chart-container5', {
         data.reverse().forEach(item => {
           var value = Math.abs(parseInt(item.value) / 1000000);
           cumulativeSum += value;
-	  cumulativeSum = parseFloat(cumulativeSum.toFixed(6));
+          cumulativeSum = parseFloat(cumulativeSum.toFixed(6));
           seriesData.push([new Date(item.ts * 1000).getTime(), cumulativeSum]);
         });
 
@@ -684,18 +684,18 @@ Highcharts.chart('chart-container5', {
             },
             name: 'Burned Supply',
             data: seriesData,
-			dataLabels: {
-            enabled: true,
-            formatter: function () {
+            dataLabels: {
+              enabled: true,
+              formatter: function() {
                 if (this.point.index === 0) {
-                    return `${(this.y/1000000).toFixed(2)+"M"}`;
+                  return `${(this.y / 1000000).toFixed(2) + "M"}`;
                 }
                 return null;
+              },
+              align: 'right',
+              verticalAlign: 'middle',
+
             },
-            align: 'right',
-            verticalAlign: 'middle',
-            
-        },
           }],
           credits: {
             enabled: false
@@ -705,15 +705,15 @@ Highcharts.chart('chart-container5', {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-	  
-	  fetch('https://stats.dipdup.net/v1/histogram/accounts_stats/max/week?field=Total&size=1000')
+
+    fetch('https://stats.dipdup.net/v1/histogram/accounts_stats/max/week?field=Total&size=1000')
       .then(response => response.json())
       .then(data => {
         var seriesData = [];
         var cumulativeSum = 0;
 
         data.reverse().forEach(item => {
-          var value = Math.abs(parseInt(item.value) );
+          var value = Math.abs(parseInt(item.value));
           seriesData.push([new Date(item.ts * 1000).getTime(), value]);
         });
 
@@ -786,18 +786,18 @@ Highcharts.chart('chart-container5', {
             },
             name: 'Total Accounts',
             data: seriesData,
-			dataLabels: {
-            enabled: true,
-            formatter: function () {
+            dataLabels: {
+              enabled: true,
+              formatter: function() {
                 if (this.point.index === 0) {
-                    return `${(this.y/1000000).toFixed(2)+"M"}`;
+                  return `${(this.y / 1000000).toFixed(2) + "M"}`;
                 }
                 return null;
-            },
-            align: 'right',
-            verticalAlign: 'middle',
-            
-           }
+              },
+              align: 'right',
+              verticalAlign: 'middle',
+
+            }
           }],
           credits: {
             enabled: false
