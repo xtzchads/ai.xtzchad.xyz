@@ -391,7 +391,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
 
     const clearedSeries = data.map(item => ({
       x: new Date(item[0]).getTime(),
-      y: -item[2]
+      y: item[2]
     }));
 console.log(clearedSeries);
     Highcharts.chart('chart-container4', {
@@ -435,11 +435,27 @@ console.log(clearedSeries);
       },
       series: [
         {
+	showInLegend: false,
+            shadow: {
+              color: 'rgba(255, 255, 0, 0.7)',
+              offsetX: 0,
+              offsetY: 0,
+              opacity: 1,
+              width: 10
+            },
           name: 'Funded Accounts',
           data: fundedSeries,
           color: '#77dd77',
         },
         {
+		showInLegend: false,
+            shadow: {
+              color: 'rgba(255, 255, 0, 0.7)',
+              offsetX: 0,
+              offsetY: 0,
+              opacity: 1,
+              width: 10
+            },
           name: 'Cleared Accounts',
           data: clearedSeries,
           color: '#ff6961',
