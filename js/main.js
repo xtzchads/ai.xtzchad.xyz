@@ -406,12 +406,10 @@ console.log(clearedSeries);
         }
       },
       xAxis: {
+	      labels: {
+              enabled: false
+            },
         type: 'datetime',
-        labels: {
-          style: {
-            color: '#ffffff'
-          }
-        },
         title: {
           text: 'Date',
           style: {
@@ -420,13 +418,11 @@ console.log(clearedSeries);
         }
       },
       yAxis: {
+	      labels: {
+              enabled: false
+            }
         title: {
           text: 'Account Count',
-          style: {
-            color: '#ffffff'
-          }
-        },
-        labels: {
           style: {
             color: '#ffffff'
           }
