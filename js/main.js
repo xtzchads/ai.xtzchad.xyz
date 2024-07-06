@@ -522,7 +522,7 @@ Highcharts.chart('chart-container5', {
         style: {
             fontSize: '8px', // Adjust the font size of the subtitle
             color: '#ffffff' // Optionally adjust the color of the subtitle text
-        }
+        },
 
     pane: {
         startAngle: -90,
