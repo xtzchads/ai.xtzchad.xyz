@@ -418,6 +418,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
         }
       },
       yAxis: {
+	gridLineWidth: 0,
         labels: {
           enabled: false
         },
