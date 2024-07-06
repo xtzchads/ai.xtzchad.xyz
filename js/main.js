@@ -406,6 +406,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
         }
       },
       xAxis: {
+	lineColor: '#ffffff',
         labels: {
           enabled: false
         },
@@ -451,7 +452,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
             },
             stops: [
               [0, '#77dd77'],
-              [1, '#ff6961']
+              [1, '#77dd77']
             ]
           },
           borderWidth: 0
@@ -476,7 +477,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
             },
             stops: [
               [0, '#ff6961'],
-              [1, '#77dd77']
+              [1, '#ff6961']
             ]
           },
           borderWidth: 0
