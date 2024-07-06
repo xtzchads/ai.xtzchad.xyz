@@ -262,7 +262,13 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       xAxis: {
         labels: {
-          enabled: false
+          enabled: true,
+	  formatter: function () {
+        if (this.value === currentCycle) {
+          return currentCycle;
+        }
+        return ''; 
+      }
         },
         lineColor: '#ffffff',
         title: {
