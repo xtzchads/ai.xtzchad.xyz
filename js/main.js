@@ -394,7 +394,7 @@ fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleare
       y: -item[2]
     }));
 console.log(clearedSeries);
-    Highcharts.chart('chart-container-4', {
+    Highcharts.chart('chart-container4', {
       chart: {
         type: 'column',
         backgroundColor: 'rgba(0,0,0,0)'
