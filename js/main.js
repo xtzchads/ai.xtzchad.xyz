@@ -2,6 +2,7 @@ const transition_period = 50;
 const initial_period = 10;
 const ai_activation_cycle = 748;
 let currentCycle;
+let forecasted;
 
 function computeExtremum(cycle, initial_value, final_value) {
   const trans = transition_period + 1;
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
           ratios.push(last);
 		  
         }
+	forecasted=ratios[ratios.length-1];
         return ratios;
       });
 	  function calculateAverageDifference(arr) {
