@@ -14,6 +14,7 @@ This project visualizes various metrics related to the Tezos blockchain, includi
 - [Highcharts](https://www.highcharts.com/)
 - [Bootstrap 5](https://getbootstrap.com/)
 - TZKT API
+- tzStats API
 
 ## License
 
