@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const idealRatio = 0.5;
     const k = 4;
     const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
-    return parseInt(indicator);
+    return parseInt(indicator>100?100:indicator);
   }
 
   let ratio;
