@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         while (ratios.length < 100) {
-          last = last + calculateAverageDifference(ratios);
+          last = last + slowIncrement(last,calculateAverageDifference(ratios));
           ratios.push(last);
 
         }
@@ -128,6 +128,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateAverageDifference(arr) {
       return arr.reduce((sum, val, idx, array) =>
         idx > 0 ? sum + Math.abs(val - array[idx - 1]) : 0, 0) / (arr.length - 1);
+    }
+    function slowIncrement(current, avgDiff) {
+    const center = 0.5;
+    const scale = 4; 
+    return avgDiff / (1 + Math.exp((Math.abs(current - center) - center) / scale));
     }
   }
 
