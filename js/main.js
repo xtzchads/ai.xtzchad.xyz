@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function slowIncrement(current, avgDiff) {
     const center = 0.5;
-    const scale = 4; 
+    const scale = 6; 
     return avgDiff / (1 + Math.exp((Math.abs(current - center) - center) / scale));
     }
   }
