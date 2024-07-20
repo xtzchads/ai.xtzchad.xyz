@@ -14,18 +14,34 @@
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/main.css">
   <script src="js/background.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+    .container {
+      height: 100%;
+      padding: 0;
+    }
+
+    #chadmap {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 
 <body>
-    <div id="particle-canvas"></div>
-  <div class="container scrollable-content">
-
+  <div id="particle-canvas"></div>
+  <div class="container">
     <div class="row">
       <div class="col-lg-12">
         <figure class="highcharts-figure">
-          <div id="chadmap" style="width:100%;height:100%"></div>
+          <div id="chadmap"></div>
         </figure>
       </div>
+    </div>
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -58,9 +74,9 @@
           },
           title: {
             text: 'Tezos Chad Map',
-	style: {
-          color: '#ffffff'
-        }
+            style: {
+              color: '#ffffff'
+            }
           },
           tooltip: {
             useHTML: true,
@@ -68,7 +84,7 @@
           },
           plotOptions: {
             packedbubble: {
-			  boostThreshold:1,
+              boostThreshold: 1,
               minSize: '1%',
               maxSize: '100%',
               zMin: 0,
@@ -125,7 +141,7 @@
               }
             }]
           },
-		  credits: {
+          credits: {
             enabled: false
           }
         });
