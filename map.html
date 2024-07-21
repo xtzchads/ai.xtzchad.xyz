@@ -63,7 +63,8 @@
             name: name,
             value: stakedBalance / 1e6,
             stakedBalance: stakedBalance,
-            display: name + ': ' + (stakedBalance / 1e6).toLocaleString() + ' XTZ'
+            display: name + ': ' + (stakedBalance / 1e6).toLocaleString() + ' XTZ',
+            address: account.address
           };
         });
       }
@@ -119,6 +120,12 @@
                   }
                 }
               },
+              events: {
+                click: function(event) {
+                  const address = event.point.options.address;
+                  window.open(`https://tzkt.io/${address}`, '_blank');
+                }
+              }
             }
           },
           colorAxis: {
