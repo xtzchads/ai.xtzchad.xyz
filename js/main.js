@@ -345,7 +345,7 @@ function slowIncrement(current, avgDiff) {
         style: {
           color: '#ffffff'
         },
-        text: 'Locked supply (Move points to simulate)'
+        text: 'Locked supply'
       },
       xAxis: {
         labels: {
