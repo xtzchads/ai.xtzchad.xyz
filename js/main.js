@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
         style: {
           color: '#ffffff'
         },
-        text: 'Stake (Drag points to customize)'
+        text: 'Locked supply (Move points to simulate)'
       },
       xAxis: {
         labels: {
