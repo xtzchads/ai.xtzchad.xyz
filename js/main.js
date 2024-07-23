@@ -277,10 +277,14 @@ function slowIncrement(current, avgDiff) {
           ]
         },
         name: 'Issuance',
-        data: ratio.map((value, index) => ({
-          x: index + 748,
-          y: issuanceRate(index + 748, value)
-        })),
+        data: ratio.map((value, index) => {
+	const xValue = index + 748;
+	const yValue = issuanceRate(xValue, value);
+	const adjustedYValue = yValue + 0.0625 * yValue;
+	return {
+        x: xValue,
+        y: adjustedYValue
+	};}),
         lineWidth: 3,
         dataLabels: {
           enabled: true,
