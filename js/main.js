@@ -282,12 +282,18 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-              return `${this.y.toFixed(2) + "%"}`;
+				console.log(this.point.index);
+              return `${(this.y * 100).toFixed(2) + "%"}`;
             }
+			else if (this.point.x == currentCycle+1) {
+				console.log(1);
+              return `${(this.y * 100).toFixed(2) + "%"}`;
+            }
+			else
             return null;
           },
           align: 'right',
-          verticalAlign: 'middle',
+          verticalAlign: 'bottom',
 
         },
         marker: {
@@ -412,12 +418,18 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
+				console.log(this.point.index);
               return `${(this.y * 100).toFixed(2) + "%"}`;
             }
+			else if (this.point.x == currentCycle+1) {
+				console.log(1);
+              return `${(this.y * 100).toFixed(2) + "%"}`;
+            }
+			else
             return null;
           },
           align: 'right',
-          verticalAlign: 'middle',
+          verticalAlign: 'bottom',
 
         },
         lineWidth: 3,
@@ -785,7 +797,7 @@ function slowIncrement(current, avgDiff) {
                 return null;
               },
               align: 'right',
-              verticalAlign: 'middle',
+              verticalAlign: 'bottom',
 
             },
           }],
@@ -887,7 +899,7 @@ function slowIncrement(current, avgDiff) {
                 return null;
               },
               align: 'right',
-              verticalAlign: 'middle',
+              verticalAlign: 'bottom',
 
             }
           }],
