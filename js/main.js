@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             forecasted = ratios[ratios.length - 1];
-            console.log('Forecasted:', forecasted); // Optionally log the forecasted value
             return ratios;
         })
         .catch(error => {
@@ -152,7 +151,6 @@ function slowIncrement(current, avgDiff) {
 
 
   function calculateIndicator(stakingRatio) {
-	  console.log(stakingRatio);
     const idealRatio = 0.5;
     const k = 4;
     const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
@@ -282,11 +280,9 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-				console.log(this.point.index);
               return `${(this.y).toFixed(2) + "%"}`;
             }
 			else if (this.point.x == currentCycle+1) {
-				console.log(1);
               return `${(this.y).toFixed(2) + "%"}`;
             }
 			else
@@ -418,11 +414,9 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-				console.log(this.point.index);
               return `${(this.y * 100).toFixed(2) + "%"}`;
             }
 			else if (this.point.x == currentCycle+1) {
-				console.log(1);
               return `${(this.y * 100).toFixed(2) + "%"}`;
             }
 			else
