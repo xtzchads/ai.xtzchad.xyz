@@ -250,6 +250,12 @@ function slowIncrement(current, avgDiff) {
         }
       },
       series: [{
+	zoneAxis: 'x',
+        zones: [{
+          value: (currentCycle+1)
+        }, {
+          dashStyle: 'ShortDot'
+        }],
         showInLegend: false,
         shadow: {
           color: 'rgba(255, 255, 0, 0.7)',
