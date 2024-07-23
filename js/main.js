@@ -312,17 +312,22 @@ function slowIncrement(current, avgDiff) {
     });
 
     function updateIssuanceChart(newStakingData) {
-      const issuanceData = newStakingData.map((value, index) => ({
-        x: value.x,
-        y: issuanceRate(value.x, value.y)
-      }));
+    const issuanceData = newStakingData.map(point => {
+        const xValue = point.x;
+        const yValue = issuanceRate(xValue, point.y);
+        const adjustedYValue = yValue + 0.0625 * yValue; // Adjust y value
+        return {
+            x: xValue,
+            y: adjustedYValue
+        };
+    });
 
-      Highcharts.charts.forEach(chart => {
+    Highcharts.charts.forEach(chart => {
         if (chart.renderTo.id === 'issuance') {
-          chart.series[0].setData(issuanceData, true);
+            chart.series[0].setData(issuanceData, true);
         }
-      });
-    }
+    });
+	}
 
     Highcharts.chart('stake', {
       chart: {
