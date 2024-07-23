@@ -91,52 +91,68 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function initializeRatios() {
-    let cycleCount;
+    let ratios = [];
+    let last = 0;
+
     return fetchCycleCount()
-      .then(count => {
-        cycleCount = count;
-        currentCycle = cycleCount - 4;
-        const startCycle = 748;
-        let ratios = [];
-        let last = 0;
+        .then(count => {
+            currentCycle = count - 4;
+            const startCycle = 748;
+            const fetchPromises = [];
 
-        const fetchPromises = [];
+            for (let i = startCycle; i <= currentCycle; i++) {
+                fetchPromises.push(fetchCycleData(i));
+            }
 
-        for (let i = startCycle; i <= currentCycle; i++) {
-          fetchPromises.push(fetchCycleData(i));
-        }
+            return Promise.all(fetchPromises);
+        })
+        .then(data => {
+            data.forEach(cycleData => {
+                const ratio = cycleData[0].totalFrozen / cycleData[0].totalSupply;
+                ratios.push(ratio);
+                last = ratio;
+            });
 
-        return Promise.all(fetchPromises);
-      })
-      .then(data => {
-        let ratios = [];
-        let last = 0;
-        data.forEach(cycleData => {
-          const ratio = cycleData[0].totalFrozen / cycleData[0].totalSupply;
-          ratios.push(ratio);
-          last = ratio;
+            return exampleFetch(); // Fetch the latest data
+        })
+        .then(fetchedLast => {
+            last = fetchedLast; // Update the last value with the fetched result
+            ratios.push(last);
+
+            while (ratios.length < 100) {
+                last = last + slowIncrement(last, calculateAverageDifference(ratios));
+                ratios.push(last);
+            }
+
+            forecasted = ratios[ratios.length - 1];
+            console.log('Forecasted:', forecasted); // Optionally log the forecasted value
+            return ratios;
+        })
+        .catch(error => {
+            console.error('Error initializing ratios:', error);
         });
+}
 
-        while (ratios.length < 100) {
-          last = last + slowIncrement(last,calculateAverageDifference(ratios));
-          ratios.push(last);
+async function exampleFetch() {
+    const response = await fetch('https://api.tzkt.io/v1/statistics/?sort.desc=level&limit=1');
+    const json = await response.json();
+    return json[0].totalFrozen / json[0].totalSupply;
+}
 
-        }
-        forecasted = ratios[ratios.length - 1];
-        return ratios;
-      });
-    function calculateAverageDifference(arr) {
-      return arr.reduce((sum, val, idx, array) =>
-        idx > 0 ? sum + Math.abs(val - array[idx - 1]) : 0, 0) / (arr.length - 1);
-    }
-    function slowIncrement(current, avgDiff) {
+function calculateAverageDifference(arr) {
+    return arr.reduce((sum, val, idx, array) =>
+        idx > 0 ? sum + Math.abs(val - array[idx - 1]) : sum, 0) / (arr.length - 1);
+}
+
+function slowIncrement(current, avgDiff) {
     const center = 0.5;
     const scale = 6; 
-    return avgDiff*1.5 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
-    }
-  }
+    return avgDiff * 1.5 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
+}
+
 
   function calculateIndicator(stakingRatio) {
+	  console.log(stakingRatio);
     const idealRatio = 0.5;
     const k = 4;
     const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
@@ -163,7 +179,31 @@ document.addEventListener('DOMContentLoaded', function() {
     Highcharts.chart('issuance', {
       chart: {
         type: 'spline',
-        backgroundColor: 'rgba(0,0,0,0)'
+        backgroundColor: 'rgba(0,0,0,0)',
+		events: {
+            load: function() {
+                const chart = this;
+                const xAxis = chart.xAxis[0];
+                const yAxis = chart.yAxis[0];
+                
+                const dataPoint = chart.series[0].data.find(point => point.x === currentCycle + 1);
+                
+                if (dataPoint) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(currentCycle + 1);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+            }
+        }
       },
       title: {
         text: 'Issuance',
@@ -174,12 +214,21 @@ document.addEventListener('DOMContentLoaded', function() {
       xAxis: {
         lineColor: '#ffffff',
         labels: {
-          enabled: false
+            formatter: function() {
+                if (this.value === currentCycle+1) {
+                    return 'Now';
+                }
+                return '';
+            },
+            style: {
+                color: '#ffffff'
+            }
         },
         title: {
           text: null
         },
-        tickInterval: 1
+        tickInterval: 1,
+		tickPositions: [currentCycle+1]
       },
       yAxis: {
         labels: {
@@ -266,7 +315,31 @@ document.addEventListener('DOMContentLoaded', function() {
     Highcharts.chart('stake', {
       chart: {
         type: 'spline',
-        backgroundColor: 'rgba(0,0,0,0)'
+        backgroundColor: 'rgba(0,0,0,0)',
+		events: {
+            load: function() {
+                const chart = this;
+                const xAxis = chart.xAxis[0];
+                const yAxis = chart.yAxis[0];
+                
+                const dataPoint = chart.series[0].data.find(point => point.x === currentCycle + 1);
+                
+                if (dataPoint) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(currentCycle + 1);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+            }
+        }
       },
       title: {
         style: {
@@ -276,14 +349,23 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       xAxis: {
         labels: {
-          enabled: false,
+            formatter: function() {
+                if (this.value === currentCycle+1) {
+                    return 'Now';
+                }
+                return '';
+            },
+            style: {
+                color: '#ffffff'
+            }
         },
         lineColor: '#ffffff',
         title: {
-          text: null
+            text: null
         },
-        tickInterval: 1
-      },
+        tickPositions: [currentCycle+1],
+        tickInterval: 1,
+    },
       yAxis: {
         labels: {
           enabled: false
@@ -309,7 +391,7 @@ document.addEventListener('DOMContentLoaded', function() {
       series: [{
         zoneAxis: 'x',
         zones: [{
-          value: currentCycle
+          value: (currentCycle+1)
         }, {
           dashStyle: 'ShortDot'
         }],
@@ -371,6 +453,11 @@ document.addEventListener('DOMContentLoaded', function() {
             events: {
               drag: function(e) {
                 const point = e.target;
+				if (point.x<=currentCycle+1)
+				{
+					e.newPoint.y=point.y;
+					return;
+				}
                 const newValue = e.newPoint.y;
                 const series = point.series;
                 const updatedData = series.data.map((p, i) => ({
@@ -523,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       },
       subtitle: {
-        text: '(based on projected staking ratio distance from equilibrium using sigmoid function)', // Text for the subtitle
+        text: '', // Text for the subtitle
         style: {
           fontSize: '0.75em', // Adjust the font size of the subtitle
           color: '#ffffff' // Optionally adjust the color of the subtitle text
