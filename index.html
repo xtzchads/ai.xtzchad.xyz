@@ -12,51 +12,12 @@
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/main.css">
   <script src="js/background.js"></script>
-  <style>
-    .highcharts-figure {
-      width: 100%;
-      height: 100%;
-    }
-
-    .highcharts-figure > div {
-      width: 100%;
-      height: 100%;
-    }
-
-    .scrollable-content {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .row {
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-    }
-
-    @media (max-width: 767px) {
-      .scrollable-content {
-        justify-content: flex-start;
-      }
-
-      .row {
-        flex-direction: column;
-      }
-
-      .col-lg-4 {
-        width: 100%;
-        margin-bottom: 20px;
-      }
-    }
-  </style>
 </head>
 
 <body>
   <div id="particle-canvas"></div>
   <div class="container scrollable-content">
-    <div class="row">
+    <div class="row" style="height: 100vh;">
       <div class="col-lg-4 d-flex align-items-center justify-content-center">
         <figure class="highcharts-figure">
           <div id="stake"></div>
@@ -75,7 +36,7 @@
         </figure>
       </div>
     </div>
-    <div class="row">
+    <div class="row" style="height: 100vh;">
       <div class="col-lg-4 d-flex align-items-center justify-content-center">
         <figure class="highcharts-figure">
           <div id="chart-container2"></div>
