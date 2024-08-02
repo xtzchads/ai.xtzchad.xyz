@@ -24,16 +24,39 @@
     }
 
     .scrollable-content {
-      height: 100vh; /* Set a specific height for the container */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .row {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    @media (max-width: 767px) {
+      .scrollable-content {
+        justify-content: flex-start;
+      }
+
+      .row {
+        flex-direction: column;
+      }
+
+      .col-lg-4 {
+        width: 100%;
+        margin-bottom: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
   <div id="particle-canvas"></div>
-  <div class="container scrollable-content d-flex flex-column justify-content-center">
-
-    <div class="row flex-grow-1 d-flex align-items-center">
+  <div class="container scrollable-content">
+    <div class="row">
       <div class="col-lg-4 d-flex align-items-center justify-content-center">
         <figure class="highcharts-figure">
           <div id="stake"></div>
@@ -52,7 +75,7 @@
         </figure>
       </div>
     </div>
-    <div class="row flex-grow-1 d-flex align-items-center">
+    <div class="row">
       <div class="col-lg-4 d-flex align-items-center justify-content-center">
         <figure class="highcharts-figure">
           <div id="chart-container2"></div>
