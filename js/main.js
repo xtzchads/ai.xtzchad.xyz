@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
             last = fetchedLast; // Update the last value with the fetched result
             ratios.push(last);
 
-            while (ratios.length < 100) {
+            while (ratios.length < 200) {
                 last = last + slowIncrement(last, calculateAverageDifference(ratios));
                 ratios.push(last);
             }
