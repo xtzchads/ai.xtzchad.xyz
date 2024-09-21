@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function fetchCycleData(cycle) {
-    return fetch(`https://api.tzkt.io/v1/statistics/cyclic?cycle=${cycle}`)
+    return fetch(`https://kukai.api.tzkt.io/v1/statistics/cyclic?cycle=${cycle}`)
       .then(response => response.json());
   }
 
