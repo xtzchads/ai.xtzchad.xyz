@@ -146,7 +146,7 @@ function calculateAverageDifference(arr) {
 function slowIncrement(current, avgDiff) {
     const center = 0.5;
     const scale = 6; 
-    return avgDiff * 1.5 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
+    return avgDiff * 1.2 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
 }
 
 
