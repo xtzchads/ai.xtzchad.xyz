@@ -69,7 +69,7 @@ function dyn(cycle, value, tmp1) {
 var tmp1;
 
 function issuanceRate(cycle, value) {
-  const adjustedCycle = cycle;
+  const adjustedCycle = cycle-2;
   tmp1 = value;
   const staticRateRatio = staticRate(cycle, value);
   const bonus = dyn(cycle, value, tmp1);
