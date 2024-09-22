@@ -176,7 +176,7 @@ function calculateAverageDifference(arr) {
 function slowIncrement(current, avgDiff) {
     const center = 0.5;
     const scale = 6; 
-    return avgDiff * 1 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
+    return avgDiff * 0.8 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
 }
 
 
@@ -215,11 +215,25 @@ function slowIncrement(current, avgDiff) {
                 const yAxis = chart.yAxis[0];
                 
                 const dataPoint = chart.series[0].data.find(point => point.x === currentCycle + 1);
-                
+                const dataPoint2 = chart.series[0].data.find(point => point.x === 803);
                 if (dataPoint) {
                     const yValue = dataPoint.y;
                     
                     const xPos = xAxis.toPixels(currentCycle + 1);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+				if (dataPoint2) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(803);
                     const yPosTop = yAxis.toPixels(yValue);
                     const yPosBottom = yAxis.toPixels(0);
 
@@ -246,6 +260,10 @@ function slowIncrement(current, avgDiff) {
                 if (this.value === currentCycle+1) {
                     return 'Now';
                 }
+				else if (this.value == 804) {
+                    return 'Q';
+                }
+				else
                 return '';
             },
             style: {
@@ -256,7 +274,7 @@ function slowIncrement(current, avgDiff) {
           text: null
         },
         tickInterval: 1,
-		tickPositions: [currentCycle+1]
+		tickPositions: [currentCycle+1,804]
       },
       yAxis: {
         labels: {
