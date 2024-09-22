@@ -66,6 +66,22 @@ function dyn(cycle, value, tmp1) {
   return res;
 }
 
+function adaptiveMaximum(r) {
+  if (r >= 0.5) {
+    return 0.01;
+  }
+  if (r <= 0.05) {
+    return 0.1;
+  }
+  const y = (1 + 9 * Math.pow((50 - 100 * r) / 42, 2)) / 100;
+  if (y>0.1)
+	  return 0.1;
+  else if (y<0.01)
+	  return 0.01;
+  else return y;
+
+}
+
 var tmp1;
 
 function issuanceRate(cycle, value) {
@@ -74,7 +90,21 @@ function issuanceRate(cycle, value) {
   const staticRateRatio = staticRate(cycle, value);
   const bonus = dyn(cycle, value, tmp1);
   const ratioMin = minimumRatio(adjustedCycle);
-  const ratioMax = maximumRatio(adjustedCycle);
+  ratioMax = maximumRatio(adjustedCycle);
+  const totalRate = staticRateRatio + bonus;
+  return clip(totalRate, ratioMin, ratioMax) * 100;
+}
+
+function issuanceRateQ(cycle, value) {
+  const adjustedCycle = cycle-2;
+  tmp1 = value;
+  const staticRateRatio = staticRate(cycle, value);
+  const bonus = dyn(cycle, value, tmp1);
+  const ratioMin = minimumRatio(adjustedCycle);
+  if (cycle>=804)
+  ratioMax = Math.min(maximumRatio(adjustedCycle),adaptiveMaximum(value));
+else
+	ratioMax = maximumRatio(adjustedCycle);
   const totalRate = staticRateRatio + bonus;
   return clip(totalRate, ratioMin, ratioMax) * 100;
 }
@@ -113,10 +143,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 last = ratio;
             });
 
-            return exampleFetch(); // Fetch the latest data
+            return exampleFetch();
         })
         .then(fetchedLast => {
-            last = fetchedLast; // Update the last value with the fetched result
+            last = fetchedLast;
             ratios.push(last);
 
             while (ratios.length < 200) {
@@ -146,13 +176,13 @@ function calculateAverageDifference(arr) {
 function slowIncrement(current, avgDiff) {
     const center = 0.5;
     const scale = 6; 
-    return avgDiff * 1.2 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
+    return avgDiff * 1 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
 }
 
 
   function calculateIndicator(stakingRatio) {
     const idealRatio = 0.5;
-    const k = 4;
+    const k = 2;
     const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
     return parseInt(indicator>100?100:indicator);
   }
@@ -290,7 +320,7 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "%"}`;
+              return `${(this.y).toFixed(2) + "% (P)"}`;
             }
 			else if (this.point.x == currentCycle+1) {
               return `${(this.y).toFixed(2) + "%"}`;
@@ -305,7 +335,66 @@ function slowIncrement(current, avgDiff) {
         marker: {
           enabled: false
         },
-      }],
+      },
+	  
+	  {
+	zoneAxis: 'x',
+        zones: [{
+          value: (currentCycle+1)
+        }, {
+          dashStyle: 'ShortDot'
+        }],
+        showInLegend: false,
+        shadow: {
+          color: 'rgba(255, 255, 0, 0.7)',
+          offsetX: 0,
+          offsetY: 0,
+          opacity: 1,
+          width: 10
+        },
+        color: {
+          linearGradient: {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 1
+          },
+          stops: [
+            [0, '#ff6961'],
+            [1, '#77dd77']
+          ]
+        },
+        name: 'Issuance',
+        data: ratio.map((value, index) => {
+	const xValue = index + 748;
+	const yValue = issuanceRateQ(xValue, value);
+	const adjustedYValue = yValue + 0.0625 * yValue;
+	return {
+        x: xValue,
+        y: adjustedYValue
+	};}),
+        lineWidth: 3,
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            if (this.point.index === this.series.data.length - 1) {
+              return `${(this.y).toFixed(2) + "% (Q)"}`;
+            }
+			else if (this.point.x == currentCycle+1) {
+              return `${(this.y).toFixed(2) + "%"}`;
+            }
+			else
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+
+        },
+        marker: {
+          enabled: false
+        },
+      }
+	  ],
       credits: {
         enabled: false
       }
@@ -321,10 +410,21 @@ function slowIncrement(current, avgDiff) {
             y: adjustedYValue
         };
     });
+	
+	const issuanceDataQ = newStakingData.map(point => {
+        const xValue = point.x;
+        const yValue = issuanceRateQ(xValue, point.y);
+        const adjustedYValue = yValue + 0.0625 * yValue; // Adjust y value
+        return {
+            x: xValue,
+            y: adjustedYValue
+        };
+    });
 
     Highcharts.charts.forEach(chart => {
         if (chart.renderTo.id === 'issuance') {
             chart.series[0].setData(issuanceData, true);
+			chart.series[1].setData(issuanceDataQ, true);
         }
     });
 	}
