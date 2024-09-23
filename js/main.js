@@ -248,7 +248,7 @@ function slowIncrement(current, avgDiff) {
         }
       },
       title: {
-        text: 'Issuance',
+        text: 'Issuance (incl. LB)',
         style: {
           color: '#ffffff'
         }
