@@ -230,7 +230,7 @@ function slowIncrement(current, avgDiff) {
                         })
                         .add();
                 }
-				if (dataPoint2) {
+				/*if (dataPoint2) {
                     const yValue = dataPoint.y;
                     
                     const xPos = xAxis.toPixels(803);
@@ -243,7 +243,7 @@ function slowIncrement(current, avgDiff) {
                             stroke: '#ffffff',
                         })
                         .add();
-                }
+                }*/
             }
         }
       },
@@ -260,9 +260,9 @@ function slowIncrement(current, avgDiff) {
                 if (this.value === currentCycle+1) {
                     return 'Now';
                 }
-				else if (this.value == 804) {
+				/*else if (this.value == 804) {
                     return 'Q';
-                }
+                }*/
 				else
                 return '';
             },
@@ -355,7 +355,7 @@ function slowIncrement(current, avgDiff) {
         },
       },
 	  
-	  {
+	 /* {
 	zoneAxis: 'x',
         zones: [{
           value: (currentCycle+1)
@@ -411,7 +411,7 @@ function slowIncrement(current, avgDiff) {
         marker: {
           enabled: false
         },
-      }
+      }*/
 	  ],
       credits: {
         enabled: false
