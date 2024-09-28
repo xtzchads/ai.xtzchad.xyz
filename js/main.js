@@ -338,7 +338,7 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "% (P)"}`;
+              return `${(this.y).toFixed(2) + "% (P, Qena)"}`;
             }
 			else if (this.point.x == currentCycle+1) {
               return `${(this.y).toFixed(2) + "%"}`;
