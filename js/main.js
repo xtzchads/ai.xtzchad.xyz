@@ -718,121 +718,78 @@ function slowIncrement(current, avgDiff) {
     });
 
     // New Chart Code
-    fetch('https://api.tzpro.io/series/block?columns=time,n_funded_accounts,n_cleared_accounts&end_date=now&fill=none&collapse=1M&limit=75', {
-      headers: {
-        'X-Api-Key': 'JK6F9IDTM330VW6O8W0303JPVLEY57Z',
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => response.json())
-      .then(data => {
-        const fundedSeries = data.map(item => ({
-          x: new Date(item[0]).getTime(),
-          y: item[1]
-        }));
-
-        const clearedSeries = data.map(item => ({
-          x: new Date(item[0]).getTime(),
-          y: -item[2]
-        }));
+   function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
+        const totalPercentage = totalStakedPercentage + totalDelegatedPercentage;
+        const jeetsPercentage = Math.max(0, 100 - totalPercentage); // Ensure non-negative
 
         Highcharts.chart('chart-container4', {
-          chart: {
-            type: 'column',
-            backgroundColor: 'rgba(0,0,0,0)'
-          },
-          title: {
-            text: 'Funded/Cleared accounts',
-            style: {
-              color: '#ffffff'
-            }
-          },
-          xAxis: {
-            lineColor: '#ffffff',
-            labels: {
-              enabled: false
+            chart: {
+			backgroundColor: 'rgba(0,0,0,0)',
+                type: 'pie'
             },
-            type: 'datetime',
+
             title: {
-              text: null,
-              style: {
-                color: '#ffffff'
-              }
-            }
+                text: '',
+                style: {
+				color: '#ffffff',
+                    fontSize: '24px'
+                }
+            },
+
+            tooltip: {
+                pointFormat: '<b>{point.name}: {point.y}%</b>'
+            },
+
+            series: [{
+                name: 'Ratios',
+                data: [
+                    {
+                        name: 'Staked ('+stakedAPY+'% APY)',
+                        y: totalStakedPercentage,
+                        color: Highcharts.getOptions().colors[1]
+                    },
+                    {
+                        name: 'Delegated ('+delegatedAPY+'% APY)',
+                        y: totalDelegatedPercentage,
+                        color: Highcharts.getOptions().colors[2]
+                    },
+                    {
+                        name: 'Jeets',
+                        y: jeetsPercentage,
+                        color: '#FF5733' // Optional color for Jeets section
+                    }
+                ],
+                showInLegend: false,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}', // Only display the label
+                    style: {
+					color: '#ffffff',
+                        fontSize: '14px'
+                    }
+                }
+            }],
+			exporting: {
+            enabled: false
           },
-          yAxis: {
-            gridLineWidth: 0,
-            labels: {
-              enabled: false
-            },
-            title: {
-              text: null,
-              style: {
-                color: '#ffffff'
-              }
-            },
-            gridLineColor: '#444444'
-          },
-          series: [
-            {
-              showInLegend: false,
-              shadow: {
-                color: 'rgba(255, 255, 0, 0.7)',
-                offsetX: 0,
-                offsetY: 0,
-                opacity: 1,
-                width: 10
-              },
-              name: 'Funded Accounts',
-              data: fundedSeries,
-              color: {
-                linearGradient: {
-                  x1: 0,
-                  y1: 0,
-                  x2: 0,
-                  y2: 1
-                },
-                stops: [
-                  [0, '#77dd77'],
-                  [1, '#77dd77']
-                ]
-              },
-              borderWidth: 0
-            },
-            {
-              showInLegend: false,
-              shadow: {
-                color: 'rgba(255, 255, 0, 0.7)',
-                offsetX: 0,
-                offsetY: 0,
-                opacity: 1,
-                width: 10
-              },
-              name: 'Cleared Accounts',
-              data: clearedSeries,
-              color: {
-                linearGradient: {
-                  x1: 0,
-                  y1: 0,
-                  x2: 0,
-                  y2: 1
-                },
-                stops: [
-                  [0, '#ff6961'],
-                  [1, '#ff6961']
-                ]
-              },
-              borderWidth: 0
-            }
-          ],
-          credits: {
+			credits: {
             enabled: false
           }
         });
-      })
-      .catch(error => {
-        console.error('Error fetching account data:', error);
-      });
+    }
+
+    fetch('https://back.tzkt.io/v1/home?quote=usd')
+        .then(response => response.json())
+        .then(data => {
+            // Extract totalStakedPercentage and totalDelegatedPercentage
+            const totalStakedPercentage = data.stakingData.totalStakedPercentage;
+            const totalDelegatedPercentage = data.stakingData.totalDelegatedPercentage;
+			const stakedAPY = data.stakingData.stakingApy.toFixed(2); // Assuming the field exists
+            const delegatedAPY = data.stakingData.delegationApy.toFixed(2); // Assuming the field exists
+            // Call function to create the pie chart
+            createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY);
+        })
+        .catch(error => console.error('Error fetching the API data:', error));
 
     Highcharts.chart('chart-container5', {
       chart: {
