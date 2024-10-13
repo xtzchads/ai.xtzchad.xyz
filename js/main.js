@@ -767,7 +767,8 @@ function slowIncrement(current, avgDiff) {
 					color: '#ffffff',
                         fontSize: '14px'
                     }
-                }
+                },
+		    borderColor: 'transparent'
             }],
 			exporting: {
             enabled: false
