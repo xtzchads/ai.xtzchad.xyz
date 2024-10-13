@@ -524,7 +524,16 @@ function slowIncrement(current, avgDiff) {
 	const issuanceDataQ = newStakingData.map(point => {
         const xValue = point.x;
         const yValue = issuanceRateQ(xValue, point.y);
-        const adjustedYValue = yValue + 0.0625 * yValue; // Adjust y value
+        const adjustedYValue = yValue; // Adjust y value
+        return {
+            x: xValue,
+            y: adjustedYValue
+        };
+    });
+	const issuanceDataQe = newStakingData.map(point => {
+        const xValue = point.x;
+        const yValue = issuanceRateQe(xValue, point.y);
+        const adjustedYValue = yValue; // Adjust y value
         return {
             x: xValue,
             y: adjustedYValue
@@ -533,8 +542,9 @@ function slowIncrement(current, avgDiff) {
 
     Highcharts.charts.forEach(chart => {
         if (chart.renderTo.id === 'issuance') {
-            chart.series[0].setData(issuanceData, true);
-			chart.series[1].setData(issuanceDataQ, true);
+           chart.series[0].setData(issuanceData, true);
+	   chart.series[1].setData(issuanceDataQe, true);
+	   chart.series[2].setData(issuanceDataQ, true);
         }
     });
 	}
