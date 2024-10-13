@@ -66,6 +66,28 @@ function dyn(cycle, value, tmp1) {
   return res;
 }
 
+function dyn2(cycle, value, tmp1) {
+  if (cycle <= ai_activation_cycle) {
+    tmp = 0;
+    return 0;
+  }
+  const previousBonus = tmp;
+  const stakedRatioValue = tmp1;
+  const secondsPerCycle = 245760;
+  const ratioMax = maximumRatio(cycle + 1);
+  const staticRateValue = staticRate(cycle, value);
+  const staticRateDistToMax = ratioMax - staticRateValue;
+  const udist = Math.max(0, Math.abs(stakedRatioValue - 0.4) - 0.02);
+  const dist = stakedRatioValue >= 0.4 ? -udist : udist;
+  const daysPerCycle = secondsPerCycle / 86400;
+  const maxNewBonus = Math.min(staticRateDistToMax, 0.05);
+  newBonus = previousBonus + dist * 0.01 * daysPerCycle;
+  const res = clip(newBonus, 0, maxNewBonus);
+  console.assert(res >= 0 && res <= 5);
+  tmp = res;
+  return res;
+}
+
 function adaptiveMaximum(r) {
   if (r >= 0.5) {
     return 0.01;
@@ -89,6 +111,20 @@ function issuanceRate(cycle, value) {
   tmp1 = value;
   const staticRateRatio = staticRate(cycle, value);
   const bonus = dyn(cycle, value, tmp1);
+  const ratioMin = minimumRatio(adjustedCycle);
+  ratioMax = maximumRatio(adjustedCycle);
+  const totalRate = staticRateRatio + bonus;
+  return clip(totalRate, ratioMin, ratioMax) * 100;
+}
+
+function issuanceRateQe(cycle, value) {
+  const adjustedCycle = cycle-2;
+  tmp1 = value;
+  const staticRateRatio = staticRate(cycle, value);
+  if (cycle>=813)
+  bonus = dyn2(cycle, value, tmp1);
+  else
+  bonus = dyn(cycle, value, tmp1);	
   const ratioMin = minimumRatio(adjustedCycle);
   ratioMax = maximumRatio(adjustedCycle);
   const totalRate = staticRateRatio + bonus;
@@ -230,7 +266,7 @@ function slowIncrement(current, avgDiff) {
                         })
                         .add();
                 }
-				if (dataPoint2) {
+		if (dataPoint2) {
                     const yValue = dataPoint.y;
                     
                     const xPos = xAxis.toPixels(813);
@@ -354,7 +390,63 @@ function slowIncrement(current, avgDiff) {
           enabled: false
         },
       },
-	  
+	  {
+	zoneAxis: 'x',
+        zones: [{
+          value: (currentCycle+1)
+        }, {
+          dashStyle: 'ShortDot'
+        }],
+        showInLegend: false,
+        shadow: {
+          color: 'rgba(255, 255, 0, 0.7)',
+          offsetX: 0,
+          offsetY: 0,
+          opacity: 1,
+          width: 10
+        },
+        color: {
+          linearGradient: {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 1
+          },
+          stops: [
+            [0, '#ff6961'],
+            [1, '#77dd77']
+          ]
+        },
+        name: 'Issuance',
+        data: ratio.map((value, index) => {
+	const xValue = index + 748;
+	const yValue = issuanceRateQe(xValue, value);
+	const adjustedYValue = yValue;
+	return {
+        x: xValue,
+        y: adjustedYValue
+	};}),
+        lineWidth: 3,
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            if (this.point.index === this.series.data.length - 1) {
+              return `${(this.y).toFixed(2) + "% (Qena)"}`;
+            }
+			else if (this.point.x == currentCycle+1) {
+              return `${(this.y).toFixed(2) + "%"}`;
+            }
+			else
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+
+        },
+        marker: {
+          enabled: false
+        },
+      },
 	  {
 	zoneAxis: 'x',
         zones: [{
