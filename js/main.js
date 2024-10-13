@@ -297,7 +297,7 @@ function slowIncrement(current, avgDiff) {
                     return 'Now';
                 }
 				else if (this.value == 813) {
-                    return 'Quebec';
+                    return 'Q';
                 }
 				else
                 return '';
