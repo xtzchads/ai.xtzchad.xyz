@@ -717,10 +717,10 @@ function slowIncrement(current, avgDiff) {
       }
     });
 
-    // New Chart Code
+    
    function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedAPY, delegatedAPY) {
         const totalPercentage = totalStakedPercentage + totalDelegatedPercentage;
-        const jeetsPercentage = Math.max(0, 100 - totalPercentage); // Ensure non-negative
+        const jeetsPercentage = Math.max(0, 100 - totalPercentage);
 
         Highcharts.chart('chart-container4', {
             chart: {
@@ -729,7 +729,7 @@ function slowIncrement(current, avgDiff) {
             },
 
             title: {
-                text: '',
+                text: 'TezJeetMeter',
                 style: {
 				color: '#ffffff',
                     fontSize: '24px'
@@ -756,7 +756,7 @@ function slowIncrement(current, avgDiff) {
                     {
                         name: 'Jeets',
                         y: jeetsPercentage,
-                        color: '#FF5733' // Optional color for Jeets section
+                        color: '#FF5733'
                     }
                 ],
                 showInLegend: false,
