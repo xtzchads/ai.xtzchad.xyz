@@ -215,7 +215,7 @@ function slowIncrement(current, avgDiff) {
                 const yAxis = chart.yAxis[0];
                 
                 const dataPoint = chart.series[0].data.find(point => point.x === currentCycle + 1);
-                const dataPoint2 = chart.series[0].data.find(point => point.x === 803);
+                const dataPoint2 = chart.series[0].data.find(point => point.x === 813);
                 if (dataPoint) {
                     const yValue = dataPoint.y;
                     
@@ -233,7 +233,7 @@ function slowIncrement(current, avgDiff) {
 				if (dataPoint2) {
                     const yValue = dataPoint.y;
                     
-                    const xPos = xAxis.toPixels(803);
+                    const xPos = xAxis.toPixels(813);
                     const yPosTop = yAxis.toPixels(yValue);
                     const yPosBottom = yAxis.toPixels(0);
 
@@ -274,7 +274,7 @@ function slowIncrement(current, avgDiff) {
           text: null
         },
         tickInterval: 1,
-		tickPositions: [currentCycle+1,804]
+		tickPositions: [currentCycle+1,813]
       },
       yAxis: {
         labels: {
@@ -386,7 +386,7 @@ function slowIncrement(current, avgDiff) {
         data: ratio.map((value, index) => {
 	const xValue = index + 748;
 	const yValue = issuanceRateQ(xValue, value);
-	const adjustedYValue = yValue + 0.0625 * yValue;
+	const adjustedYValue = yValue;
 	return {
         x: xValue,
         y: adjustedYValue
