@@ -101,7 +101,7 @@ function issuanceRateQ(cycle, value) {
   const staticRateRatio = staticRate(cycle, value);
   const bonus = dyn(cycle, value, tmp1);
   const ratioMin = minimumRatio(adjustedCycle);
-  if (cycle>=804)
+  if (cycle>=813)
   ratioMax = Math.min(maximumRatio(adjustedCycle),adaptiveMaximum(value));
 else
 	ratioMax = maximumRatio(adjustedCycle);
@@ -248,7 +248,7 @@ function slowIncrement(current, avgDiff) {
         }
       },
       title: {
-        text: 'Issuance (incl. LB)',
+        text: 'Issuance (excl. LB)',
         style: {
           color: '#ffffff'
         }
@@ -260,8 +260,8 @@ function slowIncrement(current, avgDiff) {
                 if (this.value === currentCycle+1) {
                     return 'Now';
                 }
-				else if (this.value == 804) {
-                    return 'Q';
+				else if (this.value == 813) {
+                    return 'Quebec';
                 }
 				else
                 return '';
@@ -328,7 +328,7 @@ function slowIncrement(current, avgDiff) {
         data: ratio.map((value, index) => {
 	const xValue = index + 748;
 	const yValue = issuanceRate(xValue, value);
-	const adjustedYValue = yValue + 0.0625 * yValue;
+	const adjustedYValue = yValue;
 	return {
         x: xValue,
         y: adjustedYValue
@@ -338,7 +338,7 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "% (P, Qena)"}`;
+              return `${(this.y).toFixed(2) + "% (P)"}`;
             }
 			else if (this.point.x == currentCycle+1) {
               return `${(this.y).toFixed(2) + "%"}`;
@@ -422,7 +422,7 @@ function slowIncrement(current, avgDiff) {
     const issuanceData = newStakingData.map(point => {
         const xValue = point.x;
         const yValue = issuanceRate(xValue, point.y);
-        const adjustedYValue = yValue + 0.0625 * yValue; // Adjust y value
+        const adjustedYValue = yValue; // Adjust y value
         return {
             x: xValue,
             y: adjustedYValue
