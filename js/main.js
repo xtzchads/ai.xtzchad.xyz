@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
             last = fetchedLast;
             ratios.push(last);
 
-            while (ratios.length < 200) {
+            while (ratios.length < 500) {
                 last = last + slowIncrement(last, calculateAverageDifference(ratios));
                 ratios.push(last);
             }
