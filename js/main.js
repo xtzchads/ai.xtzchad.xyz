@@ -104,6 +104,22 @@ function adaptiveMaximum(r) {
 
 }
 
+function adaptiveMaximumQ3(r) {
+  if (r >= 0.5) {
+    return 0.03;
+  }
+  if (r <= 0.05) {
+    return 0.1;
+  }
+  const y = (3 + 16 * Math.pow((50 - 100 * r) / 42, 2)) / 100;
+  if (y>0.1)
+	  return 0.1;
+  else if (y<0.01)
+	  return 0.01;
+  else return y;
+
+}
+
 var tmp1;
 
 function issuanceRate(cycle, value) {
@@ -118,15 +134,15 @@ function issuanceRate(cycle, value) {
 }
 
 function issuanceRateQe(cycle, value) {
-  const adjustedCycle = cycle-2;
+    const adjustedCycle = cycle-2;
   tmp1 = value;
   const staticRateRatio = staticRate(cycle, value);
-  if (cycle>=813)
-  bonus = dyn2(cycle, value, tmp1);
-  else
-  bonus = dyn(cycle, value, tmp1);	
+  const bonus = dyn(cycle, value, tmp1);
   const ratioMin = minimumRatio(adjustedCycle);
-  ratioMax = maximumRatio(adjustedCycle);
+  if (cycle>=823)
+  ratioMax = Math.min(maximumRatio(adjustedCycle),adaptiveMaximumQ3(value));
+else
+	ratioMax = maximumRatio(adjustedCycle);
   const totalRate = staticRateRatio + bonus;
   return clip(totalRate, ratioMin, ratioMax) * 100;
 }
@@ -137,7 +153,7 @@ function issuanceRateQ(cycle, value) {
   const staticRateRatio = staticRate(cycle, value);
   const bonus = dyn(cycle, value, tmp1);
   const ratioMin = minimumRatio(adjustedCycle);
-  if (cycle>=813)
+  if (cycle>=823)
   ratioMax = Math.min(maximumRatio(adjustedCycle),adaptiveMaximum(value));
 else
 	ratioMax = maximumRatio(adjustedCycle);
@@ -251,7 +267,7 @@ function slowIncrement(current, avgDiff) {
                 const yAxis = chart.yAxis[0];
                 
                 const dataPoint = chart.series[0].data.find(point => point.x === currentCycle + 1);
-                const dataPoint2 = chart.series[0].data.find(point => point.x === 813);
+                const dataPoint2 = chart.series[0].data.find(point => point.x === 823);
                 if (dataPoint) {
                     const yValue = dataPoint.y;
                     
@@ -269,7 +285,7 @@ function slowIncrement(current, avgDiff) {
 		if (dataPoint2) {
                     const yValue = dataPoint.y;
                     
-                    const xPos = xAxis.toPixels(813);
+                    const xPos = xAxis.toPixels(823);
                     const yPosTop = yAxis.toPixels(yValue);
                     const yPosBottom = yAxis.toPixels(0);
 
@@ -296,7 +312,7 @@ function slowIncrement(current, avgDiff) {
                 if (this.value === currentCycle+1) {
                     return 'Now';
                 }
-				else if (this.value == 813) {
+				else if (this.value == 823) {
                     return 'Q';
                 }
 				else
@@ -310,7 +326,7 @@ function slowIncrement(current, avgDiff) {
           text: null
         },
         tickInterval: 1,
-		tickPositions: [currentCycle+1,813]
+		tickPositions: [currentCycle+1,823]
       },
       yAxis: {
         labels: {
@@ -431,7 +447,7 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "% (Qena)"}`;
+              return `${(this.y).toFixed(2) + "% (Q3NA)"}`;
             }
 			else if (this.point.x == currentCycle+1) {
               return `${(this.y).toFixed(2) + "%"}`;
