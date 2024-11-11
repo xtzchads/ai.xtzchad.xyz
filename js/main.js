@@ -300,7 +300,7 @@ function slowIncrement(current, avgDiff) {
         }
       },
       title: {
-        text: 'Issuance (excl. LB)',
+        text: 'Issuance',
         style: {
           color: '#ffffff'
         }
