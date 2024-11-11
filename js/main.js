@@ -437,7 +437,10 @@ function slowIncrement(current, avgDiff) {
         data: ratio.map((value, index) => {
 	const xValue = index + 748;
 	const yValue = issuanceRateQe(xValue, value);
-	const adjustedYValue = yValue;
+	if (xValue<825)
+	adjustedYValue = yValue+0.25;
+		else
+	adjustedYValue = yValue;
 	return {
         x: xValue,
         y: adjustedYValue
