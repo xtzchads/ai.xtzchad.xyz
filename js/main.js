@@ -380,7 +380,7 @@ function slowIncrement(current, avgDiff) {
         data: ratio.map((value, index) => {
 	const xValue = index + 748;
 	const yValue = issuanceRate(xValue, value);
-	const adjustedYValue = yValue;
+	const adjustedYValue = yValue+0.025;
 	return {
         x: xValue,
         y: adjustedYValue
@@ -494,7 +494,7 @@ function slowIncrement(current, avgDiff) {
         data: ratio.map((value, index) => {
 	const xValue = index + 748;
 	const yValue = issuanceRateQ(xValue, value);
-	const adjustedYValue = yValue;
+	const adjustedYValue = yValue+0.025;
 	return {
         x: xValue,
         y: adjustedYValue
