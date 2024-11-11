@@ -300,7 +300,7 @@ function slowIncrement(current, avgDiff) {
         }
       },
       title: {
-        text: 'Issuance',
+        text: 'Issuance (+LB)',
         style: {
           color: '#ffffff'
         }
