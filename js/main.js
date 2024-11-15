@@ -533,7 +533,7 @@ function slowIncrement(current, avgDiff) {
     const issuanceData = newStakingData.map(point => {
         const xValue = point.x;
         const yValue = issuanceRate(xValue, point.y);
-        const adjustedYValue = yValue; // Adjust y value
+        const adjustedYValue = yValue+0.25; // Adjust y value
         return {
             x: xValue,
             y: adjustedYValue
@@ -543,7 +543,7 @@ function slowIncrement(current, avgDiff) {
 	const issuanceDataQ = newStakingData.map(point => {
         const xValue = point.x;
         const yValue = issuanceRateQ(xValue, point.y);
-        const adjustedYValue = yValue; // Adjust y value
+        const adjustedYValue = yValue+0.25; // Adjust y value
         return {
             x: xValue,
             y: adjustedYValue
