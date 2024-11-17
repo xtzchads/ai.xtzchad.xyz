@@ -552,10 +552,10 @@ function slowIncrement(current, avgDiff) {
 	const issuanceDataQe = newStakingData.map(point => {
         const xValue = point.x;
         const yValue = issuanceRateQe(xValue, point.y);
-        const adjustedYValue = yValue; // Adjust y value
+	const adjustedYValue = yValue; // Adjust y value
         return {
             x: xValue,
-            y: adjustedYValue
+            y: (cycle>=823)?adjustedYValue:adjustedYValue+0.25
         };
     });
 
