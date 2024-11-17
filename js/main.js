@@ -555,7 +555,7 @@ function slowIncrement(current, avgDiff) {
 	const adjustedYValue = yValue; // Adjust y value
         return {
             x: xValue,
-            y: (cycle>=823)?adjustedYValue:adjustedYValue+0.25
+            y: (x>=823)?adjustedYValue:adjustedYValue+0.25
         };
     });
 
