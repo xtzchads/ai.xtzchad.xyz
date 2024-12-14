@@ -228,12 +228,12 @@ function calculateAverageDifference(arr) {
 function slowIncrement(current, avgDiff) {
     const center = 0.5;
     const scale = 6; 
-    return avgDiff * 0.6 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
+    return avgDiff * 0.5 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
 }
 
 
   function calculateIndicator(stakingRatio) {
-    const idealRatio = 0.5;
+    const idealRatio = 0.4;
     const k = 2;
     const indicator = 100 / (Math.exp(-k * (stakingRatio - idealRatio)));
     return parseInt(indicator>100?100:indicator);
