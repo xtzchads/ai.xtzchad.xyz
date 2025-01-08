@@ -332,7 +332,7 @@ function slowIncrement(current, avgDiff) {
           enabled: true,
           formatter: function() {
             if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "% (Quebec)"}`;
+              return `${(this.y).toFixed(2) + "%"}`;
             }
 			else if (this.point.x == currentCycle+1) {
               return `${(this.y).toFixed(2) + "%"}`;
