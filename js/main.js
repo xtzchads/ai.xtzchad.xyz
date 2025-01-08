@@ -267,25 +267,10 @@ function slowIncrement(current, avgDiff) {
                 const yAxis = chart.yAxis[0];
                 
                 const dataPoint = chart.series[0].data.find(point => point.x === currentCycle + 1);
-                const dataPoint2 = chart.series[0].data.find(point => point.x === 823);
                 if (dataPoint) {
                     const yValue = dataPoint.y;
                     
                     const xPos = xAxis.toPixels(currentCycle + 1);
-                    const yPosTop = yAxis.toPixels(yValue);
-                    const yPosBottom = yAxis.toPixels(0);
-
-                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
-                        .attr({
-                            'stroke-width': 0.5,
-                            stroke: '#ffffff',
-                        })
-                        .add();
-                }
-		if (dataPoint2) {
-                    const yValue = dataPoint.y;
-                    
-                    const xPos = xAxis.toPixels(823);
                     const yPosTop = yAxis.toPixels(yValue);
                     const yPosBottom = yAxis.toPixels(0);
 
@@ -349,123 +334,7 @@ function slowIncrement(current, avgDiff) {
           return `Cycle: ${cycle}<br><span style="color:${this.point.color}">●</span> ${seriesName}: <b>${modifiedYValue}</b><br/>`;
         }
       },
-      series: [{
-	zoneAxis: 'x',
-        zones: [{
-          value: (currentCycle+1)
-        }, {
-          dashStyle: 'ShortDot'
-        }],
-        showInLegend: false,
-        shadow: {
-          color: 'rgba(255, 255, 0, 0.7)',
-          offsetX: 0,
-          offsetY: 0,
-          opacity: 1,
-          width: 10
-        },
-        color: {
-          linearGradient: {
-            x1: 0,
-            y1: 0,
-            x2: 0,
-            y2: 1
-          },
-          stops: [
-            [0, '#ff6961'],
-            [1, '#77dd77']
-          ]
-        },
-        name: 'Issuance',
-        data: ratio.map((value, index) => {
-	const xValue = index + 748;
-	const yValue = issuanceRate(xValue, value);
-	const adjustedYValue = yValue+0.25;
-	return {
-        x: xValue,
-        y: adjustedYValue
-	};}),
-        lineWidth: 3,
-        dataLabels: {
-          enabled: true,
-          formatter: function() {
-            if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "% (P)"}`;
-            }
-			else if (this.point.x == currentCycle+1) {
-              return `${(this.y).toFixed(2) + "%"}`;
-            }
-			else
-            return null;
-          },
-          align: 'right',
-          verticalAlign: 'bottom',
-
-        },
-        marker: {
-          enabled: false
-        },
-      },
-	  {
-	zoneAxis: 'x',
-        zones: [{
-          value: (currentCycle+1)
-        }, {
-          dashStyle: 'ShortDot'
-        }],
-        showInLegend: false,
-        shadow: {
-          color: 'rgba(255, 255, 0, 0.7)',
-          offsetX: 0,
-          offsetY: 0,
-          opacity: 1,
-          width: 10
-        },
-        color: {
-          linearGradient: {
-            x1: 0,
-            y1: 0,
-            x2: 0,
-            y2: 1
-          },
-          stops: [
-            [0, '#ff6961'],
-            [1, '#77dd77']
-          ]
-        },
-        name: 'Issuance',
-        data: ratio.map((value, index) => {
-	const xValue = index + 748;
-	const yValue = issuanceRateQe(xValue, value);
-	if (xValue<825)
-	adjustedYValue = yValue+0.25;
-		else
-	adjustedYValue = yValue;
-	return {
-        x: xValue,
-        y: adjustedYValue
-	};}),
-        lineWidth: 3,
-        dataLabels: {
-          enabled: true,
-          formatter: function() {
-            if (this.point.index === this.series.data.length - 1) {
-              return `${(this.y).toFixed(2) + "% (Q3NA)"}`;
-            }
-			else if (this.point.x == currentCycle+1) {
-              return `${(this.y).toFixed(2) + "%"}`;
-            }
-			else
-            return null;
-          },
-          align: 'right',
-          verticalAlign: 'bottom',
-
-        },
-        marker: {
-          enabled: false
-        },
-      },
+      series: [
 	  {
 	zoneAxis: 'x',
         zones: [{
@@ -530,31 +399,10 @@ function slowIncrement(current, avgDiff) {
     });
 
     function updateIssuanceChart(newStakingData) {
-    const issuanceData = newStakingData.map(point => {
-        const xValue = point.x;
-        const yValue = issuanceRate(xValue, point.y);
-        const adjustedYValue = yValue+0.25; // Adjust y value
-        return {
-            x: xValue,
-            y: adjustedYValue
-        };
-    });
-	
 	const issuanceDataQ = newStakingData.map(point => {
         const xValue = point.x;
         const yValue = issuanceRateQ(xValue, point.y);
         const adjustedYValue = yValue+0.25; // Adjust y value
-        return {
-            x: xValue,
-            y: adjustedYValue
-        };
-    });
-	const issuanceDataQe = newStakingData.map(point => {
-        const xValue = point.x;
-        const yValue = issuanceRateQe(xValue, point.y);
-	adjustedYValue = yValue+0.25; // Adjust y value
-	if (xValue>=823)
-	adjustedYValue = adjustedYValue - 0.25
         return {
             x: xValue,
             y: adjustedYValue
