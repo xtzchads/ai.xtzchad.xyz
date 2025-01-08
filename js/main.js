@@ -297,9 +297,6 @@ function slowIncrement(current, avgDiff) {
                 if (this.value === currentCycle+1) {
                     return 'Now';
                 }
-				else if (this.value == 823) {
-                    return 'Q';
-                }
 				else
                 return '';
             },
@@ -410,11 +407,8 @@ function slowIncrement(current, avgDiff) {
     });
 
     Highcharts.charts.forEach(chart => {
-        if (chart.renderTo.id === 'issuance') {
-           chart.series[0].setData(issuanceData, true);
-	   chart.series[1].setData(issuanceDataQe, true);
-	   chart.series[2].setData(issuanceDataQ, true);
-        }
+        if (chart.renderTo.id === 'issuance')
+           chart.series[0].setData(issuanceDataQ, true);
     });
 	}
 
