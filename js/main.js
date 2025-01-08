@@ -104,48 +104,7 @@ function adaptiveMaximum(r) {
 
 }
 
-function adaptiveMaximumQ3(r) {
-  if (r >= 0.5) {
-    return 0.03;
-  }
-  if (r <= 0.05) {
-    return 0.1;
-  }
-  const y = (3 + 16 * Math.pow((50 - 100 * r) / 42, 2)) / 100;
-  if (y>0.1)
-	  return 0.1;
-  else if (y<0.01)
-	  return 0.01;
-  else return y;
-
-}
-
 var tmp1;
-
-function issuanceRate(cycle, value) {
-  const adjustedCycle = cycle-2;
-  tmp1 = value;
-  const staticRateRatio = staticRate(cycle, value);
-  const bonus = dyn(cycle, value, tmp1);
-  const ratioMin = minimumRatio(adjustedCycle);
-  ratioMax = maximumRatio(adjustedCycle);
-  const totalRate = staticRateRatio + bonus;
-  return clip(totalRate, ratioMin, ratioMax) * 100;
-}
-
-function issuanceRateQe(cycle, value) {
-    const adjustedCycle = cycle-2;
-  tmp1 = value;
-  const staticRateRatio = staticRate(cycle, value);
-  const bonus = dyn(cycle, value, tmp1);
-  const ratioMin = minimumRatio(adjustedCycle);
-  if (cycle>=823)
-  ratioMax = Math.min(maximumRatio(adjustedCycle),adaptiveMaximumQ3(value));
-else
-	ratioMax = maximumRatio(adjustedCycle);
-  const totalRate = staticRateRatio + bonus;
-  return clip(totalRate, ratioMin, ratioMax) * 100;
-}
 
 function issuanceRateQ(cycle, value) {
   const adjustedCycle = cycle-2;
