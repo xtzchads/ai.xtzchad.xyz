@@ -45,6 +45,44 @@ document.addEventListener('DOMContentLoaded', function () {
       chart: {
         type: 'spline',
         backgroundColor: 'rgba(0,0,0,0)',
+        events: {
+            load: function() {
+                const chart = this;
+                const xAxis = chart.xAxis[0];
+                const yAxis = chart.yAxis[0];
+                
+                const dataPoint = chart.series[0].data.find(point => point.x === 428);
+                if (dataPoint) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(428);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+              const dataPoint2 = chart.series[0].data.find(point => point.x === 748);
+                if (dataPoint2) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(748);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+            }
+        }
       },
       title: {
         text: 'Issuance',
@@ -56,8 +94,11 @@ document.addEventListener('DOMContentLoaded', function () {
         lineColor: '#ffffff',
         labels: {
           formatter: function () {
-            if (this.value === currentCycle + 1) {
-              return 'Now';
+            if (this.value === 428) {
+              return 'Hangzhou';
+            }
+            if (this.value === 748) {
+              return 'Quebec';
             }
             return '';
           },
