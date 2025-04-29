@@ -920,12 +920,7 @@ function slowIncrement(current, avgDiff) {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-  }
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-  fetchCycleData1().then(data => {
+	  fetchCycleData1().then(data => {
     const processed = processIssuanceData(data);
     currentCycle = processed.currentCycle;
     main(processed.ratios);
@@ -935,8 +930,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return fetch(`https://kukai.api.tzkt.io/v1/statistics/cyclic?limit=10000`)
       .then(response => response.json());
   }
-
-  function processIssuanceData(data) {
+	  function processIssuanceData(data) {
 
     const ratios = [];
     for (let i = 1; i < data.length; i++) {
@@ -965,9 +959,8 @@ document.addEventListener('DOMContentLoaded', function () {
       currentCycle: data[data.length - 1].cycle
     };
   }
-
-  function main(ratioData) {
-    Highcharts.chart('historical', {
+	  
+	  Highcharts.chart('historical', {
       chart: {
         type: 'spline',
         backgroundColor: 'rgba(0,0,0,0)',
@@ -1096,5 +1089,9 @@ document.addEventListener('DOMContentLoaded', function () {
         enabled: false
       }
     });
+	  
+	  
   }
 });
+
+
