@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
           text: null
         },
         tickInterval: 1,
-
+        tickPositions: [428, 748]
       },
       yAxis: {
         labels: {
