@@ -130,7 +130,7 @@ const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
           text: null
         },
         tickInterval: 1,
-        tickPositions: [428, 748]
+        tickPositions: [428, 743, 823]
       },
       yAxis: {
         labels: {
