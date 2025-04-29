@@ -66,11 +66,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         })
                         .add();
                 }
-              const dataPoint2 = chart.series[0].data.find(point => point.x === 748);
+              const dataPoint2 = chart.series[0].data.find(point => point.x === 743);
                 if (dataPoint2) {
                     const yValue = dataPoint.y;
                     
-                    const xPos = xAxis.toPixels(748);
+                    const xPos = xAxis.toPixels(743);
                     const yPosTop = yAxis.toPixels(yValue);
                     const yPosBottom = yAxis.toPixels(0);
 
@@ -81,6 +81,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         })
                         .add();
                 }
+const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
+                if (dataPoint3) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(823);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+              
             }
         }
       },
@@ -97,7 +113,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (this.value === 428) {
               return 'Hangzhou';
             }
-            else if (this.value === 748) {
+            else if (this.value === 743) {
+              return 'Paris';
+            }
+              else if (this.value === 823) {
               return 'Quebec';
             }
             else
