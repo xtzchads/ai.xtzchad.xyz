@@ -97,9 +97,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (this.value === 428) {
               return 'Hangzhou';
             }
-            if (this.value === 748) {
+            else if (this.value === 748) {
               return 'Quebec';
             }
+            else
             return '';
           },
           style: {
