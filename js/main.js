@@ -1099,6 +1099,13 @@ const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
       series: [{
         zoneAxis: 'x',
         showInLegend: false,
+	      shadow: {
+          color: 'rgba(255, 255, 0, 0.7)',
+          offsetX: 0,
+          offsetY: 0,
+          opacity: 1,
+          width: 10
+        },
         color: {
           linearGradient: {
             x1: 0,
@@ -1249,6 +1256,13 @@ const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
       series: [{
         zoneAxis: 'x',
         showInLegend: false,
+	      shadow: {
+          color: 'rgba(255, 255, 0, 0.7)',
+          offsetX: 0,
+          offsetY: 0,
+          opacity: 1,
+          width: 10
+        },
         color: {
           linearGradient: {
             x1: 0,
