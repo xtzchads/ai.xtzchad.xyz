@@ -191,6 +191,7 @@ function slowIncrement(current, avgDiff) {
 }
 
 
+
   function calculateIndicator(stakingRatio) {
     const idealRatio = 0.4;
     const k = 2;
@@ -244,7 +245,7 @@ function slowIncrement(current, avgDiff) {
         }
       },
       title: {
-        text: 'Issuance (+LB)',
+        text: 'Issuance since Paris',
         style: {
           color: '#ffffff'
         }
@@ -322,7 +323,7 @@ function slowIncrement(current, avgDiff) {
         data: ratio.map((value, index) => {
 	const xValue = index + 748;
 	const yValue = issuanceRateQ(xValue, value);
-	const adjustedYValue = yValue+0.25;
+	const adjustedYValue = yValue+0.21;
 	return {
         x: xValue,
         y: adjustedYValue
@@ -404,7 +405,7 @@ function slowIncrement(current, avgDiff) {
         style: {
           color: '#ffffff'
         },
-        text: 'Locked supply'
+        text: 'Staked (frozen) supply since Paris'
       },
       xAxis: {
         labels: {
@@ -920,5 +921,370 @@ function slowIncrement(current, avgDiff) {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  fetchCycleData().then(data => {
+    const processed = processIssuanceData(data);
+	const processed1 = processStakingData(data);
+    currentCycle = processed.currentCycle;
+    main(processed.ratios);
+	main1(processed1.ratios);
+  });
+
+  function fetchCycleData() {
+    return fetch(`https://kukai.api.tzkt.io/v1/statistics/cyclic?limit=10000`)
+      .then(response => response.json());
+  }
+
+  function processIssuanceData(data) {
+
+    const ratios = [];
+    for (let i = 1; i < data.length; i++) {
+      const prev = data[i - 1];
+      const curr = data[i];
+
+      const prevSupply = parseFloat(prev.totalSupply);
+      const currSupply = parseFloat(curr.totalSupply);
+
+      const supplyDiff = currSupply - prevSupply;
+      const growthRate = supplyDiff / prevSupply;
+
+      const timeDiffSec = (new Date(curr.timestamp) - new Date(prev.timestamp)) / 1000;
+
+      const secondsInYear = 365.25 * 24 * 60 * 60;
+      const annualized = (growthRate * (secondsInYear / timeDiffSec)) * 100;
+
+      ratios.push({
+        cycle: curr.cycle,
+        issuance: annualized
+      });
+    }
+
+    return {
+      ratios,
+      currentCycle: data[data.length - 1].cycle
+    };
+  }
+  
+  function processStakingData(data) {
+
+    const ratios = [];
+    for (let i = 1; i < data.length; i++) {
+	const curr = data[i];
+      const ratio=data[i].totalFrozen/data[i].totalSupply;
+	  console.log(data.length);
+      ratios.push({
+        cycle: curr.cycle,
+        staking: ratio
+      });
+    }
+
+    return {
+      ratios,
+      currentCycle: data[data.length - 1].cycle
+    };
+  }
+
+  function main(ratioData) {
+    Highcharts.chart('issuanceh', {
+      chart: {
+        type: 'spline',
+        backgroundColor: 'rgba(0,0,0,0)',
+        events: {
+            load: function() {
+                const chart = this;
+                const xAxis = chart.xAxis[0];
+                const yAxis = chart.yAxis[0];
+                
+                const dataPoint = chart.series[0].data.find(point => point.x === 428);
+                if (dataPoint) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(428);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+              const dataPoint2 = chart.series[0].data.find(point => point.x === 743);
+                if (dataPoint2) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(743);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
+                if (dataPoint3) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(823);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+              
+            }
+        }
+      },
+      title: {
+        text: 'Issuance since genesis',
+        style: {
+          color: '#ffffff'
+        }
+      },
+      xAxis: {
+        lineColor: '#ffffff',
+        labels: {
+          formatter: function () {
+            if (this.value === 428) {
+              return 'Hangzhou';
+            }
+            else if (this.value === 743) {
+              return 'P';
+            }
+              else if (this.value === 823) {
+              return 'Q';
+            }
+            else
+            return '';
+          },
+          style: {
+            color: '#ffffff'
+          }
+        },
+        title: {
+          text: null
+        },
+        tickInterval: 1,
+        tickPositions: [428, 743, 823]
+      },
+      yAxis: {
+        labels: {
+          enabled: false
+        },
+        gridLineWidth: 0,
+        title: {
+          text: null
+        },
+        min: 0,
+        max: 11,
+        tickInterval: 1
+      },
+      tooltip: {
+        formatter: function () {
+          return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> Issuance: <b>${this.y.toFixed(2)}%</b><br/>`;
+        }
+      },
+      series: [{
+        zoneAxis: 'x',
+        showInLegend: false,
+        color: {
+          linearGradient: {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 1
+          },
+          stops: [
+            [0, '#ff6961'],
+            [1, '#77dd77']
+          ]
+        },
+        name: 'Issuance',
+        data: ratioData.map(d => ({
+          x: d.cycle,
+          y: d.issuance
+        })),
+        lineWidth: 3,
+        dataLabels: {
+          enabled: true,
+          formatter: function () {
+            if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle + 1) {
+              return `${this.y.toFixed(2)}%`;
+            }
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+        },
+        marker: {
+          enabled: false
+        },
+      }],
+      credits: {
+        enabled: false
+      }
+    });
+  }
+  
+  function main1(ratioData) {
+    Highcharts.chart('stakingh', {
+      chart: {
+        type: 'spline',
+        backgroundColor: 'rgba(0,0,0,0)',
+        events: {
+            load: function() {
+                const chart = this;
+                const xAxis = chart.xAxis[0];
+                const yAxis = chart.yAxis[0];
+                
+                const dataPoint = chart.series[0].data.find(point => point.x === 428);
+                if (dataPoint) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(428);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+              const dataPoint2 = chart.series[0].data.find(point => point.x === 743);
+                if (dataPoint2) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(743);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
+                if (dataPoint3) {
+                    const yValue = dataPoint.y;
+                    
+                    const xPos = xAxis.toPixels(823);
+                    const yPosTop = yAxis.toPixels(yValue);
+                    const yPosBottom = yAxis.toPixels(0);
+
+                    chart.renderer.path(['M', xPos, yPosTop, 'L', xPos, yPosBottom])
+                        .attr({
+                            'stroke-width': 0.5,
+                            stroke: '#ffffff',
+                        })
+                        .add();
+                }
+              
+            }
+        }
+      },
+      title: {
+        text: 'Staking (frozen tez) since genesis',
+        style: {
+          color: '#ffffff'
+        }
+      },
+      xAxis: {
+        lineColor: '#ffffff',
+        labels: {
+          formatter: function () {
+            if (this.value === 428) {
+              return 'Hangzhou';
+            }
+            else if (this.value === 743) {
+              return 'P';
+            }
+              else if (this.value === 823) {
+              return 'Q';
+            }
+            else
+            return '';
+          },
+          style: {
+            color: '#ffffff'
+          }
+        },
+        title: {
+          text: null
+        },
+        tickInterval: 1,
+        tickPositions: [428, 743, 823]
+      },
+      yAxis: {
+        labels: {
+          enabled: false
+        },
+        gridLineWidth: 0,
+        title: {
+          text: null
+        },
+        min: 0,
+        tickInterval: 1
+      },
+      tooltip: {
+        formatter: function () {
+          return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> Staking (frozen tez): <b>${this.y.toFixed(2)}%</b><br/>`;
+        }
+      },
+      series: [{
+        zoneAxis: 'x',
+        showInLegend: false,
+        color: {
+          linearGradient: {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 1
+          },
+          stops: [
+            [0, '#ff6961'],
+            [1, '#77dd77']
+          ]
+        },
+        name: 'Issuance since genesis',
+        data: ratioData.map(d => ({
+          x: d.cycle,
+          y: d.staking*100
+        })),
+        lineWidth: 3,
+        dataLabels: {
+          enabled: true,
+          formatter: function () {
+            if (this.point.index === this.series.data.length - 1 || this.point.x === currentCycle + 1) {
+              return `${this.y.toFixed(2)}%`;
+            }
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+        },
+        marker: {
+          enabled: false
+        },
+      }],
+      credits: {
+        enabled: false
+      }
+    });
   }
 });
