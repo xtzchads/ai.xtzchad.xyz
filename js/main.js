@@ -405,7 +405,7 @@ function slowIncrement(current, avgDiff) {
         style: {
           color: '#ffffff'
         },
-        text: 'Staked (frozen) supply since Paris'
+        text: 'Staked since Paris'
       },
       xAxis: {
         labels: {
@@ -1206,7 +1206,7 @@ const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
         }
       },
       title: {
-        text: 'Staked (frozen) supply since genesis',
+        text: 'Staked since genesis',
         style: {
           color: '#ffffff'
         }
