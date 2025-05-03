@@ -1257,8 +1257,8 @@ const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
             y2: 1
           },
           stops: [
+[1, '#77dd77'],
             [0, '#ff6961'],
-            [1, '#77dd77']
           ]
         },
         name: 'Issuance since genesis',
