@@ -1206,7 +1206,7 @@ const dataPoint3 = chart.series[0].data.find(point => point.x === 823);
         }
       },
       title: {
-        text: 'Staking (frozen tez) since genesis',
+        text: 'Staked (frozen) supply since genesis',
         style: {
           color: '#ffffff'
         }
