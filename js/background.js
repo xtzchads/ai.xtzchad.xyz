@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var options = {
         particleColor: "#888",
         interactive: false,
-        speed: "low",
+        speed: "slow",
         density: "low",
     };
     new ParticleNetwork(canvasDiv, options);
