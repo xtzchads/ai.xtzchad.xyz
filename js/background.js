@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var canvasDiv = document.getElementById("particle-canvas");
     var options = {
         particleColor: "#888",
-        interactive: true,
+        interactive: false,
         speed: "low",
         density: "low",
     };
