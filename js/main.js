@@ -222,7 +222,7 @@ function createIssuanceChart(ratio) {
       name: 'Issuance',
       data: ratio.map((value, index) => ({
         x: index + 748,
-        y: issuanceRateQ(index + 748, value)+0.21
+        y: issuanceRateQ(index + 748, value)+0.24
       })),
       lineWidth: 3,
       dataLabels: {
@@ -641,7 +641,7 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
 function updateIssuanceChart(newStakingData) {
   const issuanceDataQ = newStakingData.map(point => ({
     x: point.x,
-    y: issuanceRateQ(point.x, point.y)+0.21
+    y: issuanceRateQ(point.x, point.y)+0.24
   }));
 
   Highcharts.charts.forEach(chart => {
