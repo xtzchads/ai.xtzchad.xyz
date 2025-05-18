@@ -25,7 +25,7 @@ function clip(value, minValue, maxValue) { return Math.max(minValue, Math.min(va
 
 function staticRate(cycle, value) {
   const staticRateValue = 1 / 1600 * (1 / (value ** 2));
-  return clip(staticRateValue, minimumRatio(cycle + 1), maximumRatio(cycle + 1));
+  return clip(staticRateValue, minimumRatio(cycle), maximumRatio(cycle));
 }
 
 function applyBonus(cycle, value, targetRatio, tmp1) {
@@ -218,8 +218,8 @@ function createIssuanceChart(ratio) {
       },
       name: 'Issuance',
       data: ratio.map((value, index) => ({
-        x: index + 748,
-        y: issuanceRateQ(index + 748, value)+0.24
+        x: index + 749,
+        y: issuanceRateQ(index + 749, value)+0.24
       })),
       lineWidth: 3,
       dataLabels: {
