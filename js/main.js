@@ -54,9 +54,6 @@ function dyn(cycle, value, tmp1) {
   return applyBonus(cycle, value, 0.5, tmp1);
 }
 
-function dyn2(cycle, value, tmp1) {
-  return applyBonus(cycle, value, 0.4, tmp1);
-}
 
 function adaptiveMaximum(r) {
   if (r >= 0.5) return 0.01;
@@ -69,8 +66,8 @@ function adaptiveMaximum(r) {
 function issuanceRateQ(cycle, value) {
   const adjustedCycle = cycle - 2;
   tmp1 = value;
-  const staticRateRatio = staticRate(cycle, value);
-  const bonus = dyn(cycle, value, tmp1);
+  const staticRateRatio = staticRate(adjustedCycle, value);
+  const bonus = dyn(adjustedCycle, value, tmp1);
   const ratioMin = minimumRatio(adjustedCycle);
   const ratioMax = cycle >= 823 ? 
     Math.min(maximumRatio(adjustedCycle), adaptiveMaximum(value)) : 
