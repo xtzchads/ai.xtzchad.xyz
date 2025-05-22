@@ -381,73 +381,76 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
   });
 }
 
-function createBullMeter() {
-  Highcharts.chart('chart-container5', {
-    chart: {
-      type: 'gauge',
-      plotBackgroundColor: null,
-      plotBackgroundImage: null,
-      plotBorderWidth: 0,
-      plotShadow: true,
-      backgroundColor: 'rgba(0,0,0,0)',
-    },
-    title: {
-      text: 'TezBullMeter',
-      style: { color: '#ffffff' }
-    },
-    subtitle: {
-      text: '',
-      style: { fontSize: '0.75em', color: '#ffffff' }
-    },
-    pane: {
-      startAngle: -90,
-      endAngle: 89.9,
-      background: null,
-      center: ['50%', '75%'],
+function createDALSupportChart() {
+  fetch('https://dal-dashboard.vercel.app/api/history')
+    .then(response => response.json())
+    .then(data => {
+      // Data comes in descending order (most recent first), so reverse it
+      const reversedData = data.reverse();
+      
+      // Find current cycle from the data
+      const latestCycle = data[data.length - 1]?.cycle || currentCycle;
+      
+      const chartData = reversedData.map(item => ({
+        x: item.cycle,
+        y: item.dal_baking_power_percentage / 100 // Convert percentage to decimal for consistency
+      }));
+
+      Highcharts.chart('chart-container5', {
+        chart: {
+          type: 'spline',
+          backgroundColor: 'rgba(0,0,0,0)',
+        },
+        title: {
+          text: 'DAL Support',
+          style: { color: '#ffffff' }
+        },
+        xAxis: {
+                lineColor: '#ffffff',
+      lineWidth: 1,
+      labels: { enabled: false }
     },
     yAxis: {
-      min: 0, max: 100,
-      tickPixelInterval: 72,
-      tickPosition: 'inside',
-      tickColor: '#ffffff',
-      tickLength: 20,
-      tickWidth: 2,
-      minorTickInterval: null,
-      labels: {
-        distance: 20,
-        style: { fontSize: '14px', color: '#ffffff' }
-      },
-      lineWidth: 0,
-      plotBands: [
-        { from: 0, to: 40, color: '#DF5353', thickness: 20, borderRadius: '50%' },
-        { from: 65, to: 100, color: '#55BF3B', thickness: 20, borderRadius: '50%' },
-        { from: 30, to: 70, color: '#DDDF0D', thickness: 20 }
-      ]
+      gridLineWidth: 0,
+      title: { text: null },
+      labels: { enabled: false }
     },
-    series: [{
-      name: '',
-      data: [calculateIndicator(forecasted)],
-      tooltip: { valueSuffix: '% Moon' },
-      dataLabels: {
-        format: '{y}% Moon',
-        borderWidth: 0,
-        color: '#ffffff',
-        style: { fontSize: '16px' }
-      },
-      dial: {
-        radius: '80%',
-        backgroundColor: 'gray',
-        baseWidth: 12,
-        baseLength: '0%',
-        rearLength: '0%'
-      },
-      pivot: {
-        backgroundColor: 'gray',
-        radius: 6
-      }
-    }],
-    credits: { enabled: false }
-  });
+        tooltip: {
+          formatter: function() {
+            return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> DAL Support: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
+          }
+        },
+        series: [{
+          shadow: {
+            color: 'rgba(255, 255, 0, 0.7)',
+            offsetX: 0, offsetY: 0,
+            opacity: 1, width: 10
+          },
+          name: "DAL Support",
+          showInLegend: false,
+          data: chartData,
+          dataLabels: {
+            enabled: true,
+            formatter: function() {
+              if (this.point.index === this.series.data.length - 1) {
+                return `${(this.y * 100).toFixed(2)}%`;
+              }
+              return null;
+            },
+            align: 'right',
+            verticalAlign: 'bottom',
+          },
+          lineWidth: 3,
+          marker: { enabled: false },
+          color: {
+            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+            stops: [[0, '#77dd77'], [1, '#ff6961']]
+          }
+        }],
+        credits: { enabled: false }
+      });
+    })
+    .catch(error => {});
 }
 
 function createBurnedSupplyChart() {
@@ -680,7 +683,7 @@ function processStakingData(data) {
 function main(ratio) {
   const issuanceChart = createIssuanceChart(ratio);
   const stakeChart = createStakeChart(ratio, updateIssuanceChart);
-  createBullMeter();
+  createDALSupportChart();
   createBurnedSupplyChart();
   createTotalAccountsChart();
   
