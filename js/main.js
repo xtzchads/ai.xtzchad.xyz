@@ -395,7 +395,7 @@ function createDALSupportChart() {
         x: item.cycle,
         y: item.dal_baking_power_percentage / 100 // Convert percentage to decimal for consistency
       }));
-
+      
       Highcharts.chart('chart-container5', {
         chart: {
           type: 'spline',
@@ -406,15 +406,32 @@ function createDALSupportChart() {
           style: { color: '#ffffff' }
         },
         xAxis: {
-                lineColor: '#ffffff',
-      lineWidth: 1,
-      labels: { enabled: false }
-    },
-    yAxis: {
-      gridLineWidth: 0,
-      title: { text: null },
-      labels: { enabled: false }
-    },
+          lineColor: '#ffffff',
+          lineWidth: 1,
+          labels: { enabled: false }
+        },
+        yAxis: {
+          gridLineWidth: 0,
+          title: { text: null },
+          labels: { enabled: false },
+          plotLines: [{
+            color: '#ffffff',
+            width: 2,
+            value: 0.67,
+            dashStyle: 'dot',
+            zIndex: 5,
+            label: {
+              text: 'Activation (67%)',
+              align: 'left',
+              style: {
+                color: '#ffffff',
+                fontWeight: 'bold'
+              },
+              x: 10,
+              y: -10
+            }
+          }]
+        },
         tooltip: {
           formatter: function() {
             return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> DAL Support: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
