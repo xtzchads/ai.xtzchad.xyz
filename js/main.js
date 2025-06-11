@@ -585,7 +585,46 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
       type: 'spline',
       backgroundColor: 'rgba(0,0,0,0)',
       events: {
-        load: function() { createVerticalLines(this, tickPositions); }
+        load: function() { 
+          this.customGroup = this.renderer.g('custom-lines').add();
+          this.addCustomLines = function() {
+            // Clear the group (this removes all child elements)
+            this.customGroup.destroy();
+            this.customGroup = this.renderer.g('custom-lines').add();
+            
+            const chartData = data.map(dataMapper);
+            
+            [428, 743, 823].forEach(position => {
+              const dataPoint = chartData.find(point => point.x === position);
+              if (dataPoint) {
+                const xPixel = this.xAxis[0].toPixels(position);
+                const yPixel = this.yAxis[0].toPixels(dataPoint.y);
+                const bottomPixel = this.plotTop + this.plotHeight;
+                
+                // Only draw if the intersection point is above the bottom
+                if (yPixel < bottomPixel) {
+                  this.renderer.path([
+                    'M', xPixel, bottomPixel,
+                    'L', xPixel, yPixel
+                  ])
+                  .attr({
+                    'stroke-width': 1,
+                    stroke: '#ffffff',
+                    'stroke-dasharray': '5,5'
+                  })
+                  .add(this.customGroup);
+                }
+              }
+            });
+          };
+          
+          this.addCustomLines();
+        },
+        redraw: function() {
+          if (this.addCustomLines) {
+            this.addCustomLines();
+          }
+        }
       }
     },
     title: {
