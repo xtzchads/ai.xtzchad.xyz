@@ -728,12 +728,74 @@ function processStakingData(data) {
   };
 }
 
+function createTVLChart() {
+  try {
+    const tvlData = aggregatedDataCache.tvlData;
+    
+    if (!tvlData || !tvlData.series || tvlData.series.length === 0) {
+      console.error('No TVL data available');
+      return;
+    }
+    
+    const series = tvlData.series[0];
+    const projects = series.values[0];
+    const tvlValues = series.values[1];
+    const layers = series.values[2];
+    
+    const pieData = projects.map((project, index) => ({
+      name: `${project}`,
+      y: tvlValues[index],
+      color: index < Highcharts.getOptions().colors.length ? 
+        Highcharts.getOptions().colors[index] : 
+        `hsl(${(index * 25) % 360}, 70%, 50%)`
+    }));
+    
+    const totalTVL = tvlValues.reduce((sum, value) => sum + value, 0);
+    
+    Highcharts.chart('tvl-chart-container', {
+      chart: {
+        backgroundColor: 'rgba(0,0,0,0)',
+        type: 'pie'
+      },
+      title: {
+        text: 'TVL',
+        style: { color: '#ffffff', fontSize: '24px' }
+      },
+	  subtitle: {
+  text: `Total: $${totalTVL.toLocaleString()}`,
+  style: { color: '#cccccc', fontSize: '16px' }
+},
+      tooltip: {
+        pointFormat: 'Share: {point.percentage:.1f}%'
+      },
+      series: [{
+        name: 'TVL',
+        data: pieData,
+        showInLegend: false,
+        dataLabels: {
+          enabled: true,
+          format: '{point.name}<br/>${point.y:,.0f}',
+          style: { color: '#ffffff', fontSize: '12px' },
+          distance: 20
+        },
+        borderColor: 'transparent'
+      }],
+      exporting: { enabled: false },
+      credits: { enabled: false }
+    });
+  } catch (error) {
+    console.error('Error creating TVL chart:', error);
+  }
+}
+
+
 function main(ratio) {
   const issuanceChart = createIssuanceChart(ratio);
   const stakeChart = createStakeChart(ratio, updateIssuanceChart);
   createDALSupportChart();
   createBurnedSupplyChart();
   createTotalAccountsChart();
+  createTVLChart();
   
   try {
     const data = aggregatedDataCache.homeData;
