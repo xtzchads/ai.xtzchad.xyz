@@ -2,6 +2,7 @@
 const TRANSITION_PERIOD = 50;
 const INITIAL_PERIOD = 10;
 const AI_ACTIVATION_CYCLE = 748;
+const WORKER_URL = 'https://ai.xtzchad.xyz/api/v1/getData';
 
 // State variables
 let currentCycle, forecasted, tmp = 0, tmp1;
@@ -77,6 +78,19 @@ function issuanceRateQ(cycle, value) {
   return clip(totalRate, ratioMin, ratioMax) * 100;
 }
 
+async function fetchAggregatedData() {
+  try {
+    const response = await fetch(WORKER_URL);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching aggregated data:', error);
+    throw error;
+  }
+}
+
 function calculateIndicator(stakingRatio) {
   const indicator = 100 / (Math.exp(-2 * (stakingRatio - 0.5)));
   return parseInt(Math.min(indicator, 100));
@@ -84,14 +98,12 @@ function calculateIndicator(stakingRatio) {
 
 // Data fetching functions
 function fetchHistoricalCycleData() {
-  return fetch(`https://kukai.api.tzkt.io/v1/statistics/cyclic?limit=10000`)
-    .then(response => response.json());
+  return fetchAggregatedData().then(data => data.historicalCycleData);
 }
 
 async function getCurrentStakingRatio() {
-  const response = await fetch('https://api.tzkt.io/v1/statistics/?sort.desc=level&limit=1');
-  const json = await response.json();
-  return json[0].totalFrozen / json[0].totalSupply;
+  const data = await fetchAggregatedData();
+  return data.currentStakingRatio;
 }
 
 function calculateAverageDifference(arr) {
@@ -382,20 +394,19 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
 }
 
 function createDALSupportChart() {
-  fetch('https://dal-o-meter.tezos.com/api/history')
-    .then(response => response.json())
-    .then(data => {
-      // Data comes in descending order (most recent first), so reverse it
-      const reversedData = data.reverse();
+  fetchAggregatedData()
+    .then(aggregatedData => {
+      const data = aggregatedData.dalHistoryData;
       
       // Find current cycle from the data
       const latestCycle = data[data.length - 1]?.cycle || currentCycle;
       
-      const chartData = reversedData.map(item => ({
+      const chartData = data.map(item => ({
         x: item.cycle,
         y: item.dal_baking_power_percentage / 100 // Convert percentage to decimal for consistency
       }));
       
+      // ... rest of the chart creation code remains the same
       Highcharts.chart('chart-container5', {
         chart: {
           type: 'spline',
@@ -467,43 +478,25 @@ function createDALSupportChart() {
         credits: { enabled: false }
       });
     })
-    .catch(error => {});
+    .catch(error => console.error('Error loading DAL data:', error));
 }
 
 function createBurnedSupplyChart() {
-  fetch('https://stats.dipdup.net/v1/histogram/balance_update/sum/month?field=Update&Kind=2&size=1000')
-    .then(response => response.json())
-    .then(data => {
-      let seriesData = [];
-      let cumulativeSum = 0;
-
-      data.reverse().forEach(item => {
-        const value = Math.abs(parseInt(item.value) / 1000000);
-        cumulativeSum += value;
-        cumulativeSum = parseFloat(cumulativeSum.toFixed(6));
-        seriesData.push([new Date(item.ts * 1000).getTime(), cumulativeSum]);
-      });
-
-      seriesData.reverse();
-
+  fetchAggregatedData()
+    .then(aggregatedData => {
+      const seriesData = aggregatedData.burnedSupplyData;
       createTimeSeriesChart('chart-container', 'Burned Supply', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
     })
-    .catch(error => console.error('Error fetching data:', error));
+    .catch(error => console.error('Error loading burned supply data:', error));
 }
 
 function createTotalAccountsChart() {
-  fetch('https://stats.dipdup.net/v1/histogram/accounts_stats/max/week?field=Total&size=1000')
-    .then(response => response.json())
-    .then(data => {
-      const seriesData = data
-        .reverse()
-        .map(item => [new Date(item.ts * 1000).getTime(), Math.abs(parseInt(item.value))]);
-
-      seriesData.reverse();
-
+  fetchAggregatedData()
+    .then(aggregatedData => {
+      const seriesData = aggregatedData.totalAccountsData;
       createTimeSeriesChart('chart-container2', 'Total Accounts', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
     })
-    .catch(error => console.error('Error fetching data:', error));
+    .catch(error => console.error('Error loading accounts data:', error));
 }
 
 function createTimeSeriesChart(containerId, title, data, formatter) {
@@ -743,9 +736,10 @@ function main(ratio) {
   createBurnedSupplyChart();
   createTotalAccountsChart();
   
-  fetch('https://back.tzkt.io/v1/home?quote=usd')
-    .then(response => response.json())
-    .then(data => {
+  // Use aggregated data instead of direct API call
+  fetchAggregatedData()
+    .then(aggregatedData => {
+      const data = aggregatedData.homeData;
       const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = data.stakingData;
       createPieChart(
         totalStakedPercentage, 
@@ -754,7 +748,7 @@ function main(ratio) {
         delegationApy.toFixed(2)
       );
     })
-    .catch(error => console.error('Error fetching the API data:', error));
+    .catch(error => console.error('Error fetching the aggregated data:', error));
 }
 
 // Event listeners
