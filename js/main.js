@@ -382,7 +382,7 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
 }
 
 function createDALSupportChart() {
-  fetch('https://dal-dashboard.tezos.com/api/history')
+  fetch('https://dal-o-meter.tezos.com/api/history')
     .then(response => response.json())
     .then(data => {
       // Data comes in descending order (most recent first), so reverse it
