@@ -3,11 +3,9 @@ const TRANSITION_PERIOD = 50;
 const INITIAL_PERIOD = 10;
 const AI_ACTIVATION_CYCLE = 748;
 const WORKER_URL = 'https://ai.xtzchad.xyz/api/v1/getData';
-
-// State variables
+let aggregatedDataCache = null;
 let currentCycle, forecasted, tmp = 0, tmp1;
 
-// Core calculation functions
 function computeExtremum(cycle, initialValue, finalValue) {
   const initialLimit = AI_ACTIVATION_CYCLE + INITIAL_PERIOD;
   const transLimit = initialLimit + TRANSITION_PERIOD + 1;
@@ -96,14 +94,12 @@ function calculateIndicator(stakingRatio) {
   return parseInt(Math.min(indicator, 100));
 }
 
-// Data fetching functions
 function fetchHistoricalCycleData() {
-  return fetchAggregatedData().then(data => data.historicalCycleData);
+  return aggregatedDataCache.historicalCycleData;
 }
 
 async function getCurrentStakingRatio() {
-  const data = await fetchAggregatedData();
-  return data.currentStakingRatio;
+  return aggregatedDataCache.currentStakingRatio;
 }
 
 function calculateAverageDifference(arr) {
@@ -117,44 +113,49 @@ function slowIncrement(current, avgDiff) {
   return avgDiff * 0.4 / (1 + Math.exp((Math.abs(current - center) - center) / scale));
 }
 
-// Initialize ratios using the historical data
-function initializeRatios() {
+function fetchHistoricalCycleData() {
+  return aggregatedDataCache.historicalCycleData;
+}
+
+async function getCurrentStakingRatio() {
+  return aggregatedDataCache.currentStakingRatio;
+}
+
+async function initializeRatios() {
   let ratios = [];
   let last = 0;
 
-  return fetchHistoricalCycleData()
-    .then(data => {
-      currentCycle = data[data.length - 1].cycle;
-      const startCycle = AI_ACTIVATION_CYCLE;
-      
-      // Filter data from AI activation cycle onward
-      const relevantData = data.filter(cycleData => cycleData.cycle >= startCycle);
-      
-      relevantData.forEach(cycleData => {
-        const ratio = cycleData.totalFrozen / cycleData.totalSupply;
-        ratios.push(ratio);
-        last = ratio;
-      });
-      
-      return getCurrentStakingRatio();
-    })
-    .then(fetchedLast => {
-      last = fetchedLast;
+  try {
+    aggregatedDataCache = await fetchAggregatedData();
+    
+    const data = aggregatedDataCache.historicalCycleData;
+    currentCycle = data[data.length - 1].cycle;
+    const startCycle = AI_ACTIVATION_CYCLE;
+    
+    const relevantData = data.filter(cycleData => cycleData.cycle >= startCycle);
+    
+    relevantData.forEach(cycleData => {
+      const ratio = cycleData.totalFrozen / cycleData.totalSupply;
+      ratios.push(ratio);
+      last = ratio;
+    });
+    
+    last = aggregatedDataCache.currentStakingRatio;
+    ratios.push(last);
+
+    while (ratios.length < 495) {
+      last += slowIncrement(last, calculateAverageDifference(ratios));
       ratios.push(last);
+    }
 
-      // Generate forecasted data up to 495 points if needed
-      while (ratios.length < 495) {
-        last += slowIncrement(last, calculateAverageDifference(ratios));
-        ratios.push(last);
-      }
-
-      forecasted = ratios[ratios.length - 1];
-      return ratios;
-    })
-    .catch(error => console.error('Error initializing ratios:', error));
+    forecasted = ratios[ratios.length - 1];
+    return ratios;
+  } catch (error) {
+    console.error('Error initializing ratios:', error);
+    throw error;
+  }
 }
 
-// Chart creation functions
 function createVerticalLine(chart, xValue) {
   const xAxis = chart.xAxis[0];
   const yAxis = chart.yAxis[0];
@@ -394,109 +395,107 @@ function createPieChart(totalStakedPercentage, totalDelegatedPercentage, stakedA
 }
 
 function createDALSupportChart() {
-  fetchAggregatedData()
-    .then(aggregatedData => {
-      const data = aggregatedData.dalHistoryData;
-      
-      // Find current cycle from the data
-      const latestCycle = data[data.length - 1]?.cycle || currentCycle;
-      
-      const chartData = data.map(item => ({
-        x: item.cycle,
-        y: item.dal_baking_power_percentage / 100 // Convert percentage to decimal for consistency
-      }));
-      
-      // ... rest of the chart creation code remains the same
-      Highcharts.chart('chart-container5', {
-        chart: {
-          type: 'spline',
-          backgroundColor: 'rgba(0,0,0,0)',
-        },
-        title: {
-          text: 'DAL Support',
-          style: { color: '#ffffff' }
-        },
-        xAxis: {
-          lineColor: '#ffffff',
-          lineWidth: 1,
-          labels: { enabled: false }
-        },
-        yAxis: {
-          gridLineWidth: 0,
-          title: { text: null },
-          labels: { enabled: false },
-          plotLines: [{
-            color: '#ffffff',
-            width: 2,
-            value: 0.67,
-            dashStyle: 'dot',
-            zIndex: 5,
-            label: {
-              text: 'Activation (67%)',
-              align: 'left',
-              style: {
-                color: '#ffffff',
-                fontWeight: 'bold'
-              },
-              x: 10,
-              y: -10
-            }
-          }]
-        },
-        tooltip: {
-          formatter: function() {
-            return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> DAL Support: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
-          }
-        },
-        series: [{
-          shadow: {
-            color: 'rgba(255, 255, 0, 0.7)',
-            offsetX: 0, offsetY: 0,
-            opacity: 1, width: 10
-          },
-          name: "DAL Support",
-          showInLegend: false,
-          data: chartData,
-          dataLabels: {
-            enabled: true,
-            formatter: function() {
-              if (this.point.index === this.series.data.length - 1) {
-                return `${(this.y * 100).toFixed(2)}%`;
-              }
-              return null;
+  try {
+    const data = aggregatedDataCache.dalHistoryData;
+    
+    const latestCycle = data[data.length - 1]?.cycle || currentCycle;
+    
+    const chartData = data.map(item => ({
+      x: item.cycle,
+      y: item.dal_baking_power_percentage / 100
+    }));
+    
+    Highcharts.chart('chart-container5', {
+      chart: {
+        type: 'spline',
+        backgroundColor: 'rgba(0,0,0,0)',
+      },
+      title: {
+        text: 'DAL Support',
+        style: { color: '#ffffff' }
+      },
+      xAxis: {
+        lineColor: '#ffffff',
+        lineWidth: 1,
+        labels: { enabled: false }
+      },
+      yAxis: {
+        gridLineWidth: 0,
+        title: { text: null },
+        labels: { enabled: false },
+        plotLines: [{
+          color: '#ffffff',
+          width: 2,
+          value: 0.67,
+          dashStyle: 'dot',
+          zIndex: 5,
+          label: {
+            text: 'Activation (67%)',
+            align: 'left',
+            style: {
+              color: '#ffffff',
+              fontWeight: 'bold'
             },
-            align: 'right',
-            verticalAlign: 'bottom',
-          },
-          lineWidth: 3,
-          marker: { enabled: false },
-          color: {
-            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-            stops: [[0, '#77dd77'], [1, '#ff6961']]
+            x: 10,
+            y: -10
           }
-        }],
-        credits: { enabled: false }
-      });
-    })
-    .catch(error => console.error('Error loading DAL data:', error));
+        }]
+      },
+      tooltip: {
+        formatter: function() {
+          return `Cycle: ${this.x}<br><span style="color:${this.point.color}">●</span> DAL Support: <b>${(this.y * 100).toFixed(2)}%</b><br/>`;
+        }
+      },
+      series: [{
+        shadow: {
+          color: 'rgba(255, 255, 0, 0.7)',
+          offsetX: 0, offsetY: 0,
+          opacity: 1, width: 10
+        },
+        name: "DAL Support",
+        showInLegend: false,
+        data: chartData,
+        dataLabels: {
+          enabled: true,
+          formatter: function() {
+            if (this.point.index === this.series.data.length - 1) {
+              return `${(this.y * 100).toFixed(2)}%`;
+            }
+            return null;
+          },
+          align: 'right',
+          verticalAlign: 'bottom',
+        },
+        lineWidth: 3,
+        marker: { enabled: false },
+        color: {
+          linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+          stops: [[0, '#77dd77'], [1, '#ff6961']]
+        }
+      }],
+      credits: { enabled: false }
+    });
+  } catch (error) {
+    console.error('Error loading DAL data:', error);
+  }
 }
 
 function createBurnedSupplyChart() {
-  fetchAggregatedData()
-    .then(aggregatedData => {
-      const seriesData = aggregatedData.burnedSupplyData;
-      createTimeSeriesChart('chart-container', 'Burned Supply', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
-    })
-    .catch(error => console.error('Error loading burned supply data:', error));
+  try {
+    const seriesData = aggregatedDataCache.burnedSupplyData;
+    createTimeSeriesChart('chart-container', 'Burned Supply', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
+  } catch (error) {
+    console.error('Error loading burned supply data:', error);
+  }
 }
 
 function createTotalAccountsChart() {
-  fetchAggregatedData()
-    .then(aggregatedData => {
-      const seriesData = aggregatedData.totalAccountsData;
-      createTimeSeriesChart('chart-container2', 'Total Accounts', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
-    })
-    .catch(error => console.error('Error loading accounts data:', error));
+  try {
+    const seriesData = aggregatedDataCache.totalAccountsData;
+    createTimeSeriesChart('chart-container2', 'Total Accounts', seriesData, value => `${(value / 1000000).toFixed(2)}M`);
+  } catch (error) {
+    console.error('Error loading accounts data:', error);
+  }
 }
 
 function createTimeSeriesChart(containerId, title, data, formatter) {
@@ -555,7 +554,8 @@ function createTimeSeriesChart(containerId, title, data, formatter) {
 }
 
 function createHistoricalCharts() {
-  fetchHistoricalCycleData().then(data => {
+  try {
+    const data = aggregatedDataCache.historicalCycleData;
     const issuanceData = processIssuanceData(data);
     const stakingData = processStakingData(data);
     currentCycle = issuanceData.currentCycle;
@@ -569,7 +569,9 @@ function createHistoricalCharts() {
       x: d.cycle,
       y: d.staking * 100
     }), [428, 743, 823]);
-  });
+  } catch (error) {
+    console.error('Error creating historical charts:', error);
+  }
 }
 
 function createHistoricalChart(containerId, title, data, dataMapper, tickPositions) {
@@ -581,7 +583,6 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
         load: function() { 
           this.customGroup = this.renderer.g('custom-lines').add();
           this.addCustomLines = function() {
-            // Clear the group (this removes all child elements)
             this.customGroup.destroy();
             this.customGroup = this.renderer.g('custom-lines').add();
             
@@ -594,7 +595,6 @@ function createHistoricalChart(containerId, title, data, dataMapper, tickPositio
                 const yPixel = this.yAxis[0].toPixels(dataPoint.y);
                 const bottomPixel = this.plotTop + this.plotHeight;
                 
-                // Only draw if the intersection point is above the bottom
                 if (yPixel < bottomPixel) {
                   this.renderer.path([
                     'M', xPixel, bottomPixel,
@@ -728,7 +728,6 @@ function processStakingData(data) {
   };
 }
 
-// Main functions
 function main(ratio) {
   const issuanceChart = createIssuanceChart(ratio);
   const stakeChart = createStakeChart(ratio, updateIssuanceChart);
@@ -736,31 +735,34 @@ function main(ratio) {
   createBurnedSupplyChart();
   createTotalAccountsChart();
   
-  // Use aggregated data instead of direct API call
-  fetchAggregatedData()
-    .then(aggregatedData => {
-      const data = aggregatedData.homeData;
-      const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = data.stakingData;
-      createPieChart(
-        totalStakedPercentage, 
-        totalDelegatedPercentage, 
-        stakingApy.toFixed(2), 
-        delegationApy.toFixed(2)
-      );
-    })
-    .catch(error => console.error('Error fetching the aggregated data:', error));
+  try {
+    const data = aggregatedDataCache.homeData;
+    const { totalStakedPercentage, totalDelegatedPercentage, stakingApy, delegationApy } = data.stakingData;
+    createPieChart(
+      totalStakedPercentage, 
+      totalDelegatedPercentage, 
+      stakingApy.toFixed(2), 
+      delegationApy.toFixed(2)
+    );
+  } catch (error) {
+    console.error('Error creating pie chart:', error);
+  }
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-  if (location.hash != "") {
-    const ratio = atob(location.hash.substring(1)).split(",");
-    main(ratio);
-  } else {
-    initializeRatios()
-      .then(ratios => main(ratios))
-      .catch(error => console.error('Error initializing ratios:', error));
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    if (location.hash != "") {
+      const ratio = atob(location.hash.substring(1)).split(",");
+      // Still need to fetch data for other charts
+      aggregatedDataCache = await fetchAggregatedData();
+      main(ratio);
+    } else {
+      const ratios = await initializeRatios();
+      main(ratios);
+    }
+    
+    createHistoricalCharts();
+  } catch (error) {
+    console.error('Error during initialization:', error);
   }
-  
-  createHistoricalCharts();
 });
