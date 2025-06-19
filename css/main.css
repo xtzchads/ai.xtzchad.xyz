@@ -210,10 +210,9 @@ html {
         .chart-placeholder {
             justify-content: center;
             align-items: center;
-            background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(139, 92, 246, 0.1));
             border-radius: 0.25rem;
             backdrop-filter: blur(2px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
 .center-row {
