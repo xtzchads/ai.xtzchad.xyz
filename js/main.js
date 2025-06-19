@@ -853,7 +853,7 @@ function createTVLChart() {
         type: 'pie'
       },
       title: {
-        text: 'TVL',
+        text: 'DeFi TVL',
         style: { color: '#ffffff', fontSize: '24px' }
       },
 	  subtitle: {
