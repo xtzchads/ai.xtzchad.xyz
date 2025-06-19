@@ -28,6 +28,7 @@ html {
             width: 1px;
             height: 1px;
             background: transparent;
+            border-radius: 50%;
             z-index: 1;
             box-shadow: 
                 1743px 1932px #FFF, 1847px 285px #FFF, 1115px 1629px #FFF, 983px 827px #FFF, 784px 1571px #FFF,
@@ -60,6 +61,7 @@ html {
             width: 1px;
             height: 1px;
             background: transparent;
+            border-radius: 50%;
             box-shadow: 
                 1743px 1932px #FFF, 1847px 285px #FFF, 1115px 1629px #FFF, 983px 827px #FFF, 784px 1571px #FFF,
                 234px 892px #FFF, 1456px 1743px #FFF, 567px 1234px #FFF, 1789px 456px #FFF, 923px 1678px #FFF,
@@ -90,6 +92,7 @@ html {
             width: 2px;
             height: 2px;
             background: transparent;
+            border-radius: 50%;
             z-index: 1;
             box-shadow: 
                 1234px 567px #FFF, 890px 1456px #FFF, 456px 823px #FFF, 1678px 345px #FFF, 789px 1567px #FFF,
@@ -117,6 +120,7 @@ html {
             width: 2px;
             height: 2px;
             background: transparent;
+            border-radius: 50%;
             box-shadow: 
                 1234px 567px #FFF, 890px 1456px #FFF, 456px 823px #FFF, 1678px 345px #FFF, 789px 1567px #FFF,
                 234px 890px #FFF, 1345px 456px #FFF, 567px 1234px #FFF, 823px 678px #FFF, 1456px 789px #FFF,
@@ -142,6 +146,7 @@ html {
             width: 3px;
             height: 3px;
             background: transparent;
+            border-radius: 50%;
             z-index: 1;
             box-shadow: 
                 456px 1456px #FFF, 1678px 345px #FFF, 789px 678px #FFF, 234px 1234px #FFF, 1345px 890px #FFF,
@@ -169,6 +174,7 @@ html {
             width: 3px;
             height: 3px;
             background: transparent;
+            border-radius: 50%;
             box-shadow: 
                 456px 1456px #FFF, 1678px 345px #FFF, 789px 678px #FFF, 234px 1234px #FFF, 1345px 890px #FFF,
                 567px 456px #FFF, 823px 1678px #FFF, 1456px 789px #FFF, 345px 234px #FFF, 678px 1345px #FFF,
@@ -246,4 +252,3 @@ html {
 canvas {
   border-radius: 20px;
 }
-
