@@ -233,7 +233,7 @@ html {
 .scrollable-content {
   height: 100vh;
   overflow-y: auto;
-  padding-right: 15px;
+  padding: 15px;
 }
 
 .highcharts-figure,
